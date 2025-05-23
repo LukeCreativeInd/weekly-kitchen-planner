@@ -21,24 +21,26 @@ ingredient_db = {
 # Days of the week
 week_days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
-st.title("🧑‍🍳 Weekly Ingredient Calculator for Commercial Kitchens")
+st.title("🧑‍🍳 Weekly Ingredient Calculator")
 
-# Initialize daily meal input
+# Create tab system for days
+tabs = st.tabs(week_days)
 week_meals = {}
 
-for day in week_days:
-    st.subheader(f"{day}")
-    uploaded_file = st.file_uploader(f"Upload CSV for {day} (Meal,Quantity)", type="csv", key=f"upload_{day}")
-    
-    if uploaded_file:
-        df = pd.read_csv(uploaded_file)
-        week_meals[day] = df
-        st.success(f"Uploaded {len(df)} rows for {day}")
-    else:
-        meal = st.text_input(f"Manual Meal Entry ({day})", key=f"meal_{day}")
-        qty = st.number_input(f"Quantity for {meal} ({day})", min_value=0, step=1, key=f"qty_{day}")
-        if meal and qty > 0:
-            week_meals[day] = pd.DataFrame([[meal, qty]], columns=["Meal", "Quantity"])
+for idx, day in enumerate(week_days):
+    with tabs[idx]:
+        st.subheader(f"{day}")
+        uploaded_file = st.file_uploader(f"Upload CSV for {day} (Meal,Quantity)", type="csv", key=f"upload_{day}")
+        
+        if uploaded_file:
+            df = pd.read_csv(uploaded_file)
+            week_meals[day] = df
+            st.success(f"Uploaded {len(df)} rows for {day}")
+        else:
+            meal = st.text_input(f"Manual Meal Entry ({day})", key=f"meal_{day}")
+            qty = st.number_input(f"Quantity for {meal} ({day})", min_value=0, step=1, key=f"qty_{day}")
+            if meal and qty > 0:
+                week_meals[day] = pd.DataFrame([[meal, qty]], columns=["Meal", "Quantity"])
 
 # Aggregate ingredients
 ingredient_totals = {}
