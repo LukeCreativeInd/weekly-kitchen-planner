@@ -210,7 +210,7 @@ if uploaded_file:
         batches_required = math.ceil(amount / batch_size) if batch_size > 0 else 0
         for ingredient, qty_per_meal in ingredients.items():
             total = qty_per_meal * amount
-            if batch_size > 0 and ingredient == batch_ingredient and batches_required > 0:
+            if batch_size > 0 and batches_required > 0:
                 adjusted_total = round(total / batches_required)
             else:
                 adjusted_total = round(total, 2)
