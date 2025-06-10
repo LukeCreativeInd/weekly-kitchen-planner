@@ -190,12 +190,11 @@ if uploaded_file:
 
     x_left = left_margin
     x_right = left_margin + col_width + 10
-    y_start = pdf.get_y()
-    current_x = x_left
-    current_y = y_start
-    column = 0
+    y_left = pdf.get_y()
+    y_right = y_left
 
-    for idx, section in enumerate(bulk_sections):
+    def draw_section(x, y, section):
+        pdf.set_xy(x, y)
         section_title = section["title"]
         batch_ingredient = section["batch_ingredient"]
         batch_size = section["batch_size"]
@@ -203,12 +202,11 @@ if uploaded_file:
         source_meals = section["meals"]
         amount = sum(meal_totals.get(meal.upper(), 0) for meal in source_meals)
 
-        pdf.set_xy(current_x, current_y)
         pdf.set_font("Arial", "B", 11)
         pdf.set_fill_color(230, 230, 230)
         pdf.cell(col_width, cell_height, section_title, ln=1, fill=True)
 
-        pdf.set_x(current_x)
+        pdf.set_x(x)
         pdf.set_font("Arial", "B", 8)
         pdf.cell(col_width * 0.4, cell_height, "Ingredient", 1)
         pdf.cell(col_width * 0.15, cell_height, "Qty", 1)
@@ -218,6 +216,8 @@ if uploaded_file:
         pdf.ln(cell_height)
 
         pdf.set_font("Arial", "", 8)
+        start_y = pdf.get_y()
+
         batches_required = math.ceil(amount / batch_size) if batch_size > 0 else 0
 
         for ingredient, qty_per_meal in ingredients.items():
@@ -228,7 +228,7 @@ if uploaded_file:
                 adjusted_total = round(total, 2)
             batches = batches_required if batch_size > 0 and ingredient == batch_ingredient else ""
 
-            pdf.set_x(current_x)
+            pdf.set_x(x)
             pdf.cell(col_width * 0.4, cell_height, ingredient[:20], 1)
             pdf.cell(col_width * 0.15, cell_height, str(qty_per_meal), 1)
             pdf.cell(col_width * 0.15, cell_height, str(amount), 1)
@@ -236,17 +236,14 @@ if uploaded_file:
             pdf.cell(col_width * 0.15, cell_height, str(batches), 1)
             pdf.ln(cell_height)
 
-        current_y = pdf.get_y()
+        return pdf.get_y()
 
-        if column == 0:
-            current_x = x_right
-            column = 1
-            pdf.set_y(y_start)
-        else:
-            current_x = x_left
-            current_y = pdf.get_y()
-            column = 0
-            y_start = current_y
+    for i in range(0, len(bulk_sections), 2):
+        y_left = draw_section(x_left, y_left, bulk_sections[i])
+        if i + 1 < len(bulk_sections):
+            y_right = draw_section(x_right, y_right, bulk_sections[i + 1])
+        max_y = max(y_left, y_right)
+        y_left = y_right = max_y
 
     pdf_path = "bulk_ingredient_report.pdf"
     pdf.output(pdf_path)
