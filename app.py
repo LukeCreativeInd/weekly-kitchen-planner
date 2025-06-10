@@ -51,6 +51,7 @@ if uploaded_file:
     page_width = 210 - 2 * left_margin
     col_width = page_width / 2 - 5
     cell_height = 6
+    padding_after_table = 4
 
     column_heights = [pdf.get_y(), pdf.get_y()]
     column_x = [left_margin, left_margin + col_width + 10]
@@ -100,7 +101,7 @@ if uploaded_file:
             pdf.cell(col_width * 0.15, cell_height, str(batches), 1)
             pdf.ln(cell_height)
 
-        column_heights[column_index] = pdf.get_y()
+        column_heights[column_index] = pdf.get_y() + padding_after_table
 
     for section in bulk_sections:
         if column_heights[current_column] > 270:
