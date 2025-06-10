@@ -7,7 +7,163 @@ from fpdf import FPDF
 # BULK RECIPE DEFINITIONS
 # ----------------------------
 bulk_sections = [
-    # (Same definitions as before - unchanged for brevity)
+    {
+        "title": "Pasta Order",
+        "batch_ingredient": "Spaghetti",
+        "batch_size": 68,
+        "ingredients": {
+            "Spaghetti": 68,
+            "Oil": 0.7
+        },
+        "meals": ["SPAGHETTI BOLOGNESE"]
+    },
+    {
+        "title": "Penne Order",
+        "batch_ingredient": "Penne",
+        "batch_size": 59,
+        "ingredients": {
+            "Penne": 59,
+            "Oil": 0.7
+        },
+        "meals": ["CHICKEN PESTO PASTA", "CHICKEN AND BROCCOLI PASTA"]
+    },
+    {
+        "title": "Rice Recipe",
+        "batch_ingredient": "Rice",
+        "batch_size": 60,
+        "ingredients": {
+            "Rice": 60,
+            "Oil": 0.7
+        },
+        "meals": [
+            "BEEF CHOW MEIN", "BEEF BURRITO BOWL", "LEBANESE BEEF STEW",
+            "MONGOLIAN BEEF", "BUTTER CHICKEN", "THAI GREEN CHICKEN CURRY",
+            "BEANS NACHO", "CHICKEN FAJITA BOWL"
+        ]
+    },
+    {
+        "title": "Italian Herbs Chicken",
+        "batch_ingredient": "Chicken",
+        "batch_size": 80,
+        "ingredients": {
+            "Chicken": 180,
+            "Oil": 2,
+            "Lemon Juice": 6,
+            "Italian Herbs Mix": 4
+        },
+        "meals": ["CHICKEN WITH VEGETABLES", "CHICK SWEET POTATO AND BEANS", "NAKED CHICKEN PARMA", "CHICKEN ON ITS OWN"]
+    },
+    {
+        "title": "Moroccan Chicken",
+        "batch_ingredient": "Chicken",
+        "batch_size": 80,
+        "ingredients": {
+            "Chicken": 180,
+            "Oil": 2,
+            "Lemon Juice": 6,
+            "Moroccan Chicken Mix": 4
+        },
+        "meals": ["MORROCAN CHICKEN"]
+    },
+    {
+        "title": "Chicken Thigh",
+        "batch_ingredient": "Chicken Thigh",
+        "batch_size": 80,
+        "ingredients": {
+            "Chicken Thigh": 150,
+            "Roast Chicken Mix": 4,
+            "Oil": 4
+        },
+        "meals": ["ROASTED LEMON CHICKEN", "CHICKEN FAJITA BOWL"]
+    },
+    {
+        "title": "Topside Steak",
+        "batch_ingredient": "Steak",
+        "batch_size": 80,
+        "ingredients": {
+            "Steak": 110,
+            "Oil": 1.5,
+            "Baking Soda": 3
+        },
+        "meals": ["STEAK WITH MUSHROOM SAUCE", "STEAK ON ITS OWN"]
+    },
+    {
+        "title": "Lamb Shoulder Marinated",
+        "batch_ingredient": "Lamb Shoulder",
+        "batch_size": 80,
+        "ingredients": {
+            "Lamb Shoulder": 162,
+            "Oil": 2,
+            "Salt": 1.5,
+            "Oregano": 1.2
+        },
+        "meals": ["LAMB SOUVLAKI"]
+    },
+    {
+        "title": "Lamb Veg Marinated",
+        "batch_ingredient": "Red Onion",
+        "batch_size": 80,
+        "ingredients": {
+            "Red Onion": 30,
+            "Parsley": 1.5,
+            "Paprika": 0.5
+        },
+        "meals": ["LAMB SOUVLAKI"]
+    },
+    {
+        "title": "Roasted Lemon Potato",
+        "batch_ingredient": "Potatoes",
+        "batch_size": 80,
+        "ingredients": {
+            "Potatoes": 207,
+            "Oil": 1,
+            "Salt": 1.2
+        },
+        "meals": ["ROASTED LEMON CHICKEN"]
+    },
+    {
+        "title": "Roasted Potatoes Thai",
+        "batch_ingredient": "Potato",
+        "batch_size": 80,
+        "ingredients": {
+            "Potato": 60,
+            "Salt": 1
+        },
+        "meals": ["THAI GREEN CHICKEN CURRY"]
+    },
+    {
+        "title": "Potato Mash",
+        "batch_ingredient": "Potato",
+        "batch_size": 80,
+        "ingredients": {
+            "Potato": 150,
+            "Cooking Cream": 20,
+            "Butter": 7,
+            "Salt": 1.5,
+            "White Pepper": 0.5
+        },
+        "meals": ["BEEF MEATBALLS", "STEAK WITH MUSHROOM SAUCE"]
+    },
+    {
+        "title": "Sweet Potato Mash",
+        "batch_ingredient": "Sweet Potato",
+        "batch_size": 80,
+        "ingredients": {
+            "Sweet Potato": 185,
+            "Salt": 1,
+            "White Pepper": 0.5
+        },
+        "meals": ["SHEPHERD'S PIE", "CHICK SWEET POTATO AND BEANS"]
+    },
+    {
+        "title": "Green Beans",
+        "batch_ingredient": "Green Beans",
+        "batch_size": 80,
+        "ingredients": {
+            "Green Beans": 60
+        },
+        "meals": ["CHICKEN WITH VEGETABLES", "CHICK SWEET POTATO AND BEANS", "STEAK WITH MUSHROOM SAUCE"]
+    }
 ]
 
 # ----------------------------
@@ -74,7 +230,6 @@ if uploaded_file:
             pdf.cell(col_width / 2, cell_height, amount_label, 1)
             pdf.ln()
 
-        # Summary row for meals and batches
         batches = math.ceil(total_meals / batch_size) if batch_size > 0 else 0
         pdf.set_font("Arial", "I", 7)
         pdf.cell(col_width, cell_height, f"Total Meals: {total_meals} | Batches: {batches}", 0, ln=True)
@@ -84,7 +239,6 @@ if uploaded_file:
 
         section_count += 1
 
-    # Save PDF
     pdf_path = "bulk_ingredient_report.pdf"
     pdf.output(pdf_path)
     with open(pdf_path, "rb") as f:
