@@ -208,7 +208,6 @@ if uploaded_file:
         pdf.set_fill_color(230, 230, 230)
         pdf.cell(col_width, cell_height, section_title, ln=1, fill=True)
 
-        header_y = pdf.get_y()
         pdf.set_x(current_x)
         pdf.set_font("Arial", "B", 8)
         pdf.cell(col_width * 0.4, cell_height, "Ingredient", 1)
@@ -237,14 +236,13 @@ if uploaded_file:
             pdf.cell(col_width * 0.15, cell_height, str(batches), 1)
             pdf.ln(cell_height)
 
-        current_y = pdf.get_y() + 2
+        current_y = pdf.get_y()
 
         if column == 0:
             current_x = x_right
             column = 1
             pdf.set_y(y_start)
         else:
-            pdf.ln(4)
             current_x = x_left
             current_y = pdf.get_y()
             column = 0
