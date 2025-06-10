@@ -183,10 +183,19 @@ if uploaded_file:
     pdf.cell(0, 10, "Weekly Ingredient Report - Bulk Order", ln=True, align="C")
     pdf.ln(5)
 
-    col_width = 190
-    cell_height = 8
+    left_margin = 10
+    page_width = 210 - 2 * left_margin
+    col_width = page_width / 2 - 5
+    cell_height = 6
 
-    for section in bulk_sections:
+    x_left = left_margin
+    x_right = left_margin + col_width + 10
+    y_start = pdf.get_y()
+    current_x = x_left
+    current_y = y_start
+    column = 0
+
+    for idx, section in enumerate(bulk_sections):
         section_title = section["title"]
         batch_ingredient = section["batch_ingredient"]
         batch_size = section["batch_size"]
@@ -194,20 +203,24 @@ if uploaded_file:
         source_meals = section["meals"]
         amount = sum(meal_totals.get(meal.upper(), 0) for meal in source_meals)
 
-        pdf.set_font("Arial", "B", 12)
+        pdf.set_xy(current_x, current_y)
+        pdf.set_font("Arial", "B", 11)
         pdf.set_fill_color(230, 230, 230)
-        pdf.cell(col_width, cell_height, section_title, ln=True, fill=True)
+        pdf.cell(col_width, cell_height, section_title, ln=1, fill=True)
 
-        pdf.set_font("Arial", "B", 9)
-        pdf.cell(50, cell_height, "Ingredient", 1)
-        pdf.cell(30, cell_height, "Quantity", 1)
-        pdf.cell(30, cell_height, "Amount", 1)
-        pdf.cell(40, cell_height, "Total", 1)
-        pdf.cell(40, cell_height, "Batches Required", 1)
-        pdf.ln()
+        header_y = pdf.get_y()
+        pdf.set_x(current_x)
+        pdf.set_font("Arial", "B", 8)
+        pdf.cell(col_width * 0.4, cell_height, "Ingredient", 1)
+        pdf.cell(col_width * 0.15, cell_height, "Qty", 1)
+        pdf.cell(col_width * 0.15, cell_height, "Amt", 1)
+        pdf.cell(col_width * 0.15, cell_height, "Total", 1)
+        pdf.cell(col_width * 0.15, cell_height, "Batches", 1)
+        pdf.ln(cell_height)
 
-        pdf.set_font("Arial", "", 9)
+        pdf.set_font("Arial", "", 8)
         batches_required = math.ceil(amount / batch_size) if batch_size > 0 else 0
+
         for ingredient, qty_per_meal in ingredients.items():
             total = qty_per_meal * amount
             if batch_size > 0 and batches_required > 0:
@@ -215,14 +228,27 @@ if uploaded_file:
             else:
                 adjusted_total = round(total, 2)
             batches = batches_required if batch_size > 0 and ingredient == batch_ingredient else ""
-            pdf.cell(50, cell_height, ingredient, 1)
-            pdf.cell(30, cell_height, str(qty_per_meal), 1)
-            pdf.cell(30, cell_height, str(amount), 1)
-            pdf.cell(40, cell_height, str(adjusted_total), 1)
-            pdf.cell(40, cell_height, str(batches), 1)
-            pdf.ln()
 
-        pdf.ln(3)
+            pdf.set_x(current_x)
+            pdf.cell(col_width * 0.4, cell_height, ingredient[:20], 1)
+            pdf.cell(col_width * 0.15, cell_height, str(qty_per_meal), 1)
+            pdf.cell(col_width * 0.15, cell_height, str(amount), 1)
+            pdf.cell(col_width * 0.15, cell_height, str(adjusted_total), 1)
+            pdf.cell(col_width * 0.15, cell_height, str(batches), 1)
+            pdf.ln(cell_height)
+
+        current_y = pdf.get_y() + 2
+
+        if column == 0:
+            current_x = x_right
+            column = 1
+            pdf.set_y(y_start)
+        else:
+            pdf.ln(4)
+            current_x = x_left
+            current_y = pdf.get_y()
+            column = 0
+            y_start = current_y
 
     pdf_path = "bulk_ingredient_report.pdf"
     pdf.output(pdf_path)
