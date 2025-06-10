@@ -111,7 +111,7 @@ bulk_sections = [
     {
         "title": "Roasted Potatoes",
         "batch_ingredient": "Roasted Potatoes",
-        "batch_size": 0,
+        "batch_size": 60,
         "ingredients": {
             "Roasted Potatoes": 190,
             "Oil": 1,
