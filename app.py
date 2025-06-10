@@ -70,37 +70,35 @@ if uploaded_file:
         ingredients = section["ingredients"]
         source_meals = section["meals"]
         amount = sum(meal_totals.get(meal.upper(), 0) for meal in source_meals)
+        batches_required = math.ceil(amount / batch_size) if batch_size > 0 else 0
+
+        title_line = f"{section_title} - {amount} Meals"
+        if batch_size > 0:
+            title_line += f" - {batches_required} Batches"
 
         pdf.set_font("Arial", "B", 11)
         pdf.set_fill_color(230, 230, 230)
-        pdf.cell(col_width, cell_height, section_title, ln=1, fill=True)
+        pdf.cell(col_width, cell_height, title_line, ln=1, fill=True)
 
         pdf.set_x(x)
         pdf.set_font("Arial", "B", 8)
-        pdf.cell(col_width * 0.4, cell_height, "Ingredient", 1)
-        pdf.cell(col_width * 0.15, cell_height, "Quantity", 1)
-        pdf.cell(col_width * 0.15, cell_height, "Amount", 1)
-        pdf.cell(col_width * 0.15, cell_height, "Total", 1)
-        pdf.cell(col_width * 0.15, cell_height, "Batches", 1)
+        pdf.cell(col_width * 0.5, cell_height, "Ingredient", 1)
+        pdf.cell(col_width * 0.25, cell_height, "Quantity", 1)
+        pdf.cell(col_width * 0.25, cell_height, "Batch Total", 1)
         pdf.ln(cell_height)
 
         pdf.set_font("Arial", "", 8)
-        batches_required = math.ceil(amount / batch_size) if batch_size > 0 else 0
-
         for ingredient, qty_per_meal in ingredients.items():
             total = qty_per_meal * amount
             if batch_size > 0 and batches_required > 0:
                 adjusted_total = round(total / batches_required)
             else:
                 adjusted_total = round(total, 2)
-            batches = batches_required if batch_size > 0 and ingredient == batch_ingredient else ""
 
             pdf.set_x(x)
-            pdf.cell(col_width * 0.4, cell_height, ingredient[:20], 1)
-            pdf.cell(col_width * 0.15, cell_height, str(qty_per_meal), 1)
-            pdf.cell(col_width * 0.15, cell_height, str(amount), 1)
-            pdf.cell(col_width * 0.15, cell_height, str(adjusted_total), 1)
-            pdf.cell(col_width * 0.15, cell_height, str(batches), 1)
+            pdf.cell(col_width * 0.5, cell_height, ingredient[:20], 1)
+            pdf.cell(col_width * 0.25, cell_height, str(qty_per_meal), 1)
+            pdf.cell(col_width * 0.25, cell_height, str(adjusted_total), 1)
             pdf.ln(cell_height)
 
         column_heights[column_index] = pdf.get_y() + padding_after_table
