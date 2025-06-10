@@ -7,7 +7,6 @@ from fpdf import FPDF
 # RECIPE & BULK DEFINITIONS
 # ----------------------------
 
-# Meal recipe definitions (per meal)
 meal_recipes = {
     "SPAGHETTI BOLOGNESE": {
         "BEEF MINCE": 100,
@@ -24,7 +23,6 @@ meal_recipes = {
     }
 }
 
-# Bulk ingredient requirements
 bulk_order_sections = {
     "Pasta Order": [
         {
@@ -75,26 +73,32 @@ class MealPrepPDF(FPDF):
 
 st.title("📦 Meal Production Report to PDF")
 
-uploaded_file = st.file_uploader("Upload Production CSV (Meal,Quantity)", type="csv")
+uploaded_file = st.file_uploader("Upload Production CSV (Product name, Quantity)", type="csv")
 
 if uploaded_file:
     df = pd.read_csv(uploaded_file)
+    df.columns = df.columns.str.strip().str.lower()
+
+    required_cols = {"product name", "quantity"}
+    if not required_cols.issubset(df.columns):
+        st.error("CSV must include 'Product name' and 'Quantity' columns.")
+        st.stop()
+
     st.success("CSV uploaded successfully!")
     st.dataframe(df)
 
     if st.button("Generate PDF Report"):
-        meal_totals = dict(zip(df["Meal"], df["Quantity"]))
+        meal_totals = dict(zip(df["product name"].str.upper(), df["quantity"]))
 
-        # Generate PDF
         pdf = MealPrepPDF()
         pdf.add_page()
 
-        # Page 1: Bulk Order Summary
+        # Page 1: Bulk Orders
         for section, items in bulk_order_sections.items():
             table_data = []
             for i, item in enumerate(items):
                 meal = item["source_meal"]
-                meals_required = meal_totals.get(meal, 0)
+                meals_required = meal_totals.get(meal.upper(), 0)
                 batch_size = item["batch_size"]
                 batch_required = math.ceil(meals_required / batch_size) if i == 0 else ""
                 table_data.append([
@@ -108,8 +112,8 @@ if uploaded_file:
 
         # Page 2+: Meal Breakdowns
         for meal_name, ingredients in meal_recipes.items():
-            if meal_name in meal_totals:
-                qty = meal_totals[meal_name]
+            if meal_name.upper() in meal_totals:
+                qty = meal_totals[meal_name.upper()]
                 breakdown = []
                 for ing, grams in ingredients.items():
                     total = grams * qty
@@ -118,7 +122,7 @@ if uploaded_file:
                 pdf.section_title(meal_name)
                 pdf.ingredient_table(["Ingredient", "Quantity", "Amount", "Total"], breakdown, [60, 40, 30, 40])
 
-        # Save PDF
+        # Export
         pdf_path = "meal_production_report.pdf"
         pdf.output(pdf_path)
         with open(pdf_path, "rb") as f:
