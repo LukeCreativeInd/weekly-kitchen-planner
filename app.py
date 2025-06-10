@@ -192,7 +192,7 @@ if uploaded_file:
         batch_size = section["batch_size"]
         ingredients = section["ingredients"]
         source_meals = section["meals"]
-        total_meals = sum(meal_totals.get(meal.upper(), 0) for meal in source_meals)
+        amount = sum(meal_totals.get(meal.upper(), 0) for meal in source_meals)
 
         pdf.set_font("Arial", "B", 12)
         pdf.set_fill_color(230, 230, 230)
@@ -208,9 +208,8 @@ if uploaded_file:
 
         pdf.set_font("Arial", "", 9)
         for ingredient, qty_per_meal in ingredients.items():
-            amount = total_meals
             total = qty_per_meal * amount
-            batches = math.ceil(total / batch_size) if batch_size > 0 and ingredient == batch_ingredient else ""
+            batches = math.ceil(amount / batch_size) if batch_size > 0 and ingredient == batch_ingredient else ""
             pdf.cell(50, cell_height, ingredient, 1)
             pdf.cell(30, cell_height, str(qty_per_meal), 1)
             pdf.cell(30, cell_height, str(amount), 1)
