@@ -80,7 +80,7 @@ if uploaded_file:
         pdf.cell(col_width * 0.4, cell_height, "Ingredient", 1)
         pdf.cell(col_width * 0.15, cell_height, "Quantity", 1)
         pdf.cell(col_width * 0.15, cell_height, "Meals", 1)
-        pdf.cell(col_width * 0.20, cell_height, "Batch Total", 1)
+        pdf.cell(col_width * 0.15, cell_height, "Batch Qty", 1)
         pdf.cell(col_width * 0.15, cell_height, "Batches", 1)
         pdf.ln(cell_height)
 
