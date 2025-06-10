@@ -207,13 +207,18 @@ if uploaded_file:
         pdf.ln()
 
         pdf.set_font("Arial", "", 9)
+        batches_required = math.ceil(amount / batch_size) if batch_size > 0 else ""
         for ingredient, qty_per_meal in ingredients.items():
             total = qty_per_meal * amount
-            batches = math.ceil(amount / batch_size) if batch_size > 0 and ingredient == batch_ingredient else ""
+            if batch_size > 0 and ingredient == batch_ingredient:
+                adjusted_total = round(total / batches_required)
+            else:
+                adjusted_total = round(total, 2)
+            batches = batches_required if batch_size > 0 and ingredient == batch_ingredient else ""
             pdf.cell(50, cell_height, ingredient, 1)
             pdf.cell(30, cell_height, str(qty_per_meal), 1)
             pdf.cell(30, cell_height, str(amount), 1)
-            pdf.cell(40, cell_height, f"{round(total, 2)}", 1)
+            pdf.cell(40, cell_height, str(adjusted_total), 1)
             pdf.cell(40, cell_height, str(batches), 1)
             pdf.ln()
 
