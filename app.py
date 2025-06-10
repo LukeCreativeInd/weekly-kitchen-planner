@@ -10,7 +10,7 @@ bulk_sections = [
     {
         "title": "Pasta Order",
         "batch_ingredient": "Spaghetti",
-        "batch_size": 68,
+        "batch_size": 85,
         "ingredients": {
             "Spaghetti": 68,
             "Oil": 0.7
@@ -20,7 +20,7 @@ bulk_sections = [
     {
         "title": "Penne Order",
         "batch_ingredient": "Penne",
-        "batch_size": 59,
+        "batch_size": 157,
         "ingredients": {
             "Penne": 59,
             "Oil": 0.7
@@ -30,7 +30,7 @@ bulk_sections = [
     {
         "title": "Rice Recipe",
         "batch_ingredient": "Rice",
-        "batch_size": 60,
+        "batch_size": 180,
         "ingredients": {
             "Rice": 60,
             "Oil": 0.7
@@ -42,21 +42,9 @@ bulk_sections = [
         ]
     },
     {
-        "title": "Italian Herbs Chicken",
-        "batch_ingredient": "Chicken",
-        "batch_size": 80,
-        "ingredients": {
-            "Chicken": 180,
-            "Oil": 2,
-            "Lemon Juice": 6,
-            "Italian Herbs Mix": 4
-        },
-        "meals": ["CHICKEN WITH VEGETABLES", "CHICK SWEET POTATO AND BEANS", "NAKED CHICKEN PARMA", "CHICKEN ON ITS OWN"]
-    },
-    {
         "title": "Moroccan Chicken",
         "batch_ingredient": "Chicken",
-        "batch_size": 80,
+        "batch_size": 0,
         "ingredients": {
             "Chicken": 180,
             "Oil": 2,
@@ -66,20 +54,9 @@ bulk_sections = [
         "meals": ["MORROCAN CHICKEN"]
     },
     {
-        "title": "Chicken Thigh",
-        "batch_ingredient": "Chicken Thigh",
-        "batch_size": 80,
-        "ingredients": {
-            "Chicken Thigh": 150,
-            "Roast Chicken Mix": 4,
-            "Oil": 4
-        },
-        "meals": ["ROASTED LEMON CHICKEN", "CHICKEN FAJITA BOWL"]
-    },
-    {
         "title": "Topside Steak",
         "batch_ingredient": "Steak",
-        "batch_size": 80,
+        "batch_size": 0,
         "ingredients": {
             "Steak": 110,
             "Oil": 1.5,
@@ -90,7 +67,7 @@ bulk_sections = [
     {
         "title": "Lamb Shoulder Marinated",
         "batch_ingredient": "Lamb Shoulder",
-        "batch_size": 80,
+        "batch_size": 0,
         "ingredients": {
             "Lamb Shoulder": 162,
             "Oil": 2,
@@ -102,7 +79,7 @@ bulk_sections = [
     {
         "title": "Lamb Veg Marinated",
         "batch_ingredient": "Red Onion",
-        "batch_size": 80,
+        "batch_size": 0,
         "ingredients": {
             "Red Onion": 30,
             "Parsley": 1.5,
@@ -113,7 +90,7 @@ bulk_sections = [
     {
         "title": "Roasted Lemon Potato",
         "batch_ingredient": "Potatoes",
-        "batch_size": 80,
+        "batch_size": 60,
         "ingredients": {
             "Potatoes": 207,
             "Oil": 1,
@@ -124,7 +101,7 @@ bulk_sections = [
     {
         "title": "Roasted Potatoes Thai",
         "batch_ingredient": "Potato",
-        "batch_size": 80,
+        "batch_size": 0,
         "ingredients": {
             "Potato": 60,
             "Salt": 1
@@ -132,9 +109,20 @@ bulk_sections = [
         "meals": ["THAI GREEN CHICKEN CURRY"]
     },
     {
+        "title": "Roasted Potatoes",
+        "batch_ingredient": "Roasted Potatoes",
+        "batch_size": 0,
+        "ingredients": {
+            "Roasted Potatoes": 190,
+            "Oil": 1,
+            "Spices Mix": 2.5
+        },
+        "meals": ["NAKED CHICKEN PARMA", "LAMB SOUVLAKI"]
+    },
+    {
         "title": "Potato Mash",
         "batch_ingredient": "Potato",
-        "batch_size": 80,
+        "batch_size": 0,
         "ingredients": {
             "Potato": 150,
             "Cooking Cream": 20,
@@ -147,7 +135,7 @@ bulk_sections = [
     {
         "title": "Sweet Potato Mash",
         "batch_ingredient": "Sweet Potato",
-        "batch_size": 80,
+        "batch_size": 0,
         "ingredients": {
             "Sweet Potato": 185,
             "Salt": 1,
@@ -158,11 +146,15 @@ bulk_sections = [
     {
         "title": "Green Beans",
         "batch_ingredient": "Green Beans",
-        "batch_size": 80,
+        "batch_size": 0,
         "ingredients": {
             "Green Beans": 60
         },
-        "meals": ["CHICKEN WITH VEGETABLES", "CHICK SWEET POTATO AND BEANS", "STEAK WITH MUSHROOM SAUCE"]
+        "meals": [
+            "CHICKEN WITH VEGETABLES",
+            "CHICK SWEET POTATO AND BEANS",
+            "STEAK WITH MUSHROOM SAUCE"
+        ]
     }
 ]
 
@@ -191,21 +183,10 @@ if uploaded_file:
     pdf.cell(0, 10, "Weekly Ingredient Report - Bulk Order", ln=True, align="C")
     pdf.ln(5)
 
-    # Two-column layout setup
-    col_width = 95
+    col_width = 190
     cell_height = 8
-    section_count = 0
 
     for section in bulk_sections:
-        if section_count % 2 == 0 and section_count > 0:
-            pdf.ln(3)
-        if section_count % 2 == 0:
-            start_y = pdf.get_y()
-            start_x = pdf.get_x()
-        else:
-            pdf.set_y(start_y)
-            pdf.set_x(start_x + col_width + 5)
-
         section_title = section["title"]
         batch_ingredient = section["batch_ingredient"]
         batch_size = section["batch_size"]
@@ -213,31 +194,31 @@ if uploaded_file:
         source_meals = section["meals"]
         total_meals = sum(meal_totals.get(meal.upper(), 0) for meal in source_meals)
 
-        pdf.set_font("Arial", "B", 11)
+        pdf.set_font("Arial", "B", 12)
         pdf.set_fill_color(230, 230, 230)
         pdf.cell(col_width, cell_height, section_title, ln=True, fill=True)
 
-        pdf.set_font("Arial", "B", 8)
-        pdf.cell(col_width / 2, cell_height, "Ingredient", 1)
-        pdf.cell(col_width / 2, cell_height, "Batch/Grams", 1)
+        pdf.set_font("Arial", "B", 9)
+        pdf.cell(50, cell_height, "Ingredient", 1)
+        pdf.cell(30, cell_height, "Quantity", 1)
+        pdf.cell(30, cell_height, "Amount", 1)
+        pdf.cell(40, cell_height, "Total", 1)
+        pdf.cell(40, cell_height, "Batches Required", 1)
         pdf.ln()
 
-        pdf.set_font("Arial", "", 8)
-        for idx, (ingredient, per_meal) in enumerate(ingredients.items()):
-            is_batch_driver = (ingredient == batch_ingredient)
-            amount_label = f"{batch_size}" if is_batch_driver else f"{per_meal}g"
-            pdf.cell(col_width / 2, cell_height, ingredient, 1)
-            pdf.cell(col_width / 2, cell_height, amount_label, 1)
+        pdf.set_font("Arial", "", 9)
+        for ingredient, qty_per_meal in ingredients.items():
+            amount = total_meals
+            total = qty_per_meal * amount
+            batches = math.ceil(total / batch_size) if batch_size > 0 and ingredient == batch_ingredient else ""
+            pdf.cell(50, cell_height, ingredient, 1)
+            pdf.cell(30, cell_height, str(qty_per_meal), 1)
+            pdf.cell(30, cell_height, str(amount), 1)
+            pdf.cell(40, cell_height, f"{round(total, 2)}", 1)
+            pdf.cell(40, cell_height, str(batches), 1)
             pdf.ln()
 
-        batches = math.ceil(total_meals / batch_size) if batch_size > 0 else 0
-        pdf.set_font("Arial", "I", 7)
-        pdf.cell(col_width, cell_height, f"Total Meals: {total_meals} | Batches: {batches}", 0, ln=True)
-
-        if section_count % 2 == 1:
-            pdf.ln(3)
-
-        section_count += 1
+        pdf.ln(3)
 
     pdf_path = "bulk_ingredient_report.pdf"
     pdf.output(pdf_path)
