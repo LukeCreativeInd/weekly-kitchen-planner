@@ -167,7 +167,10 @@ if uploaded_file:
         pdf.set_font("Arial", "", 8)
         for i, (ingredient, qty) in enumerate(ingredients.items()):
             total_ingredient_qty = qty * total_meals
-            batch_total = round(total_ingredient_qty / batch_value, 2) if batch_value > 0 else 0
+            
+            total_quantity = qty * total_meals
+            num_batches = math.ceil(total_meals / batch_value) if batch_value > 0 else 0
+            batch_total = round(total_quantity / num_batches) if num_batches > 0 else 0
             batch_label = str(batches) if i == 0 else ""
             pdf.set_x(x)
             pdf.cell(col_width * 0.3, cell_height, ingredient[:20], 1)
