@@ -24,29 +24,6 @@ bulk_sections = [
 ]
 
 # ----------------------------
-# MEAL RECIPE DEFINITIONS (Flexible for Part 2)
-# ----------------------------
-meal_recipes = {
-    "Spaghetti Bolognese": {
-        "batch_ingredient": "Spaghetti",
-        "batch_size": 68,
-        "ingredients": {
-            "Beef Mince": 100,
-            "Napoli Sauce": 65,
-            "Beef Stock": 30,
-            "Onion": 15,
-            "Zucchini": 15,
-            "Carrot": 15,
-            "Crushed Tomatos": 45,
-            "Vegetable Oil": 1,
-            "Salt": 2,
-            "Pepper": 0.5,
-            "Spaghetti": 68
-        }
-    }
-}
-
-# ----------------------------
 # MEAL RECIPE DEFINITIONS
 # ----------------------------
 meal_recipes = {
@@ -72,7 +49,7 @@ meal_recipes = {
 # ----------------------------
 # Streamlit App
 # ----------------------------
-st.title("📦 Bulk Ingredient Summary Report")
+st.title("\U0001F4E6 Bulk Ingredient Summary Report")
 uploaded_file = st.file_uploader("Upload Production CSV (Product name, Quantity)", type="csv")
 
 if uploaded_file:
@@ -210,7 +187,7 @@ if uploaded_file:
 
     # Save and download
     filename_date = datetime.today().strftime("%d-%m-%Y")
-    pdf_path = f\"daily_production_report_{filename_date}.pdf\"
+    pdf_path = f"daily_production_report_{filename_date}.pdf"
     pdf.output(pdf_path)
-    with open(pdf_path, \"rb\") as f:
-        st.download_button(\"📄 Download Daily Production PDF\", f, file_name=pdf_path, mime=\"application/pdf\")
+    with open(pdf_path, "rb") as f:
+        st.download_button("\U0001F4C4 Download Daily Production PDF", f, file_name=pdf_path, mime="application/pdf")
