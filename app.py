@@ -135,7 +135,40 @@ if uploaded_file:
                 "Pepper": 0.5,
                 "Spaghetti": 68
             }
-        }
+        },
+       "Beef Chow Mein": {
+        "batch": 80,
+        "ingredients": {
+        "Beef Mince": 120,
+        "Celery": 42,
+        "Carrot": 42,
+        "Cabbage": 42,
+        "Onion": 42,
+        "Oil": 2,
+        "Pepper": 0.8,
+        "Soy Sauce": 13,
+        "Oyster Sauce": 13,
+        "Rice": 130
+    }, 
+           
+}
+        "Shepherd's Pie": {
+    "batch": 82,
+    "ingredients": {
+        "Beef Mince": 100,
+        "Oil": 2,
+        "Carrots": 15,
+        "Capsicum": 15,
+        "Onion": 15,
+        "Mushroom": 15,
+        "Peas": 15,
+        "Tomato Paste": 6,
+        "Beef Stock": 20,
+        "Salt": 2,
+        "Pepper": 0.5,
+        "Napoli Sauce": 70
+    }
+}
     }
 
     meal_column_heights = [pdf.get_y(), pdf.get_y()]
