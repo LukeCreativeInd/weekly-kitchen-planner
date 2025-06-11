@@ -77,19 +77,11 @@ if uploaded_file:
 
         pdf.set_x(x)
         pdf.set_font("Arial", "B", 8)
-
-        # Adjusted column widths
-        w_ingredient = col_width * 0.38
-        w_quantity = col_width * 0.14
-        w_meals = col_width * 0.14
-        w_batch_total = col_width * 0.24
-        w_batches = col_width * 0.10
-
-        pdf.cell(w_ingredient, cell_height, "Ingredient", 1)
-        pdf.cell(w_quantity, cell_height, "Quantity", 1)
-        pdf.cell(w_meals, cell_height, "Meals", 1)
-        pdf.cell(w_batch_total, cell_height, "Batch Total", 1)
-        pdf.cell(w_batches, cell_height, "Batches", 1)
+        pdf.cell(col_width * 0.38, cell_height, "Ingredient", 1)
+        pdf.cell(col_width * 0.14, cell_height, "Quantity", 1)
+        pdf.cell(col_width * 0.14, cell_height, "Meals", 1)
+        pdf.cell(col_width * 0.22, cell_height, "Batch Total", 1)
+        pdf.cell(col_width * 0.12, cell_height, "Batches", 1)
         pdf.ln(cell_height)
 
         pdf.set_font("Arial", "", 8)
@@ -104,11 +96,11 @@ if uploaded_file:
             batches = batches_required if batch_size > 0 and ingredient == batch_ingredient else ""
 
             pdf.set_x(x)
-            pdf.cell(w_ingredient, cell_height, ingredient[:20], 1)
-            pdf.cell(w_quantity, cell_height, str(qty_per_meal), 1)
-            pdf.cell(w_meals, cell_height, str(amount), 1)
-            pdf.cell(w_batch_total, cell_height, str(adjusted_total), 1)
-            pdf.cell(w_batches, cell_height, str(batches), 1)
+            pdf.cell(col_width * 0.38, cell_height, ingredient[:20], 1)
+            pdf.cell(col_width * 0.14, cell_height, str(qty_per_meal), 1)
+            pdf.cell(col_width * 0.14, cell_height, str(amount), 1)
+            pdf.cell(col_width * 0.22, cell_height, str(adjusted_total), 1)
+            pdf.cell(col_width * 0.12, cell_height, str(batches), 1)
             pdf.ln(cell_height)
 
         column_heights[column_index] = pdf.get_y() + padding_after_table
