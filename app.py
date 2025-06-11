@@ -62,7 +62,7 @@ if uploaded_file:
     st.success("CSV uploaded successfully!")
     st.dataframe(df)
 
-    meal_totals = dict(zip(df["product name"].str.upper(), df["quantity"]))
+    meal_totals = {k.strip().lower(): v for k, v in zip(df["product name"], df["quantity"])}
 
     pdf = FPDF()
     pdf.set_auto_page_break(auto=True, margin=10)
@@ -138,7 +138,7 @@ if uploaded_file:
     # Add Meal Breakdown Section
     # ----------------------------
     for meal_name, data in meal_recipes.items():
-        meal_quantity = meal_totals.get(meal_name.upper(), 0)
+        meal_quantity = meal_totals.get(meal_name.strip().lower(), 0)
         if meal_quantity == 0:
             continue
 
