@@ -24,6 +24,29 @@ bulk_sections = [
 ]
 
 # ----------------------------
+# MEAL RECIPE DEFINITIONS (Flexible for Part 2)
+# ----------------------------
+meal_recipes = {
+    "Spaghetti Bolognese": {
+        "batch_ingredient": "Spaghetti",
+        "batch_size": 68,
+        "ingredients": {
+            "Beef Mince": 100,
+            "Napoli Sauce": 65,
+            "Beef Stock": 30,
+            "Onion": 15,
+            "Zucchini": 15,
+            "Carrot": 15,
+            "Crushed Tomatos": 45,
+            "Vegetable Oil": 1,
+            "Salt": 2,
+            "Pepper": 0.5,
+            "Spaghetti": 68
+        }
+    }
+}
+
+# ----------------------------
 # Streamlit App
 # ----------------------------
 st.title("\U0001F4E6 Bulk Ingredient Summary Report")
@@ -110,6 +133,52 @@ if uploaded_file:
         if estimated_height > 270:
             current_column = 1 - current_column
         draw_section(current_column, section)
+
+    # ----------------------------
+    # Add Meal Breakdown Section
+    # ----------------------------
+    for meal_name, data in meal_recipes.items():
+        meal_quantity = meal_totals.get(meal_name.upper(), 0)
+        if meal_quantity == 0:
+            continue
+
+        estimated_height = column_heights[current_column] + (len(data["ingredients"]) + 2) * cell_height + padding_after_table
+        if estimated_height > 270:
+            current_column = 1 - current_column
+
+        x = column_x[current_column]
+        y = column_heights[current_column]
+        pdf.set_xy(x, y)
+
+        pdf.set_font("Arial", "B", 11)
+        pdf.set_fill_color(200, 200, 200)
+        pdf.cell(col_width, cell_height, meal_name, ln=1, fill=True)
+
+        pdf.set_x(x)
+        pdf.set_font("Arial", "B", 8)
+        pdf.cell(col_width * 0.38, cell_height, "Ingredient", 1)
+        pdf.cell(col_width * 0.14, cell_height, "Meals", 1)
+        pdf.cell(col_width * 0.36, cell_height, "Batch Total", 1)
+        pdf.cell(col_width * 0.12, cell_height, "Batch", 1)
+        pdf.ln(cell_height)
+
+        pdf.set_font("Arial", "", 8)
+        batch_size = data.get("batch_size", 0)
+        batches_required = math.ceil(meal_quantity / batch_size) if batch_size > 0 else 0
+
+        for idx, (ingredient, qty_per_meal) in enumerate(data["ingredients"].items()):
+            total = qty_per_meal * meal_quantity
+            batch_total = round(total / batches_required) if batch_size > 0 and batches_required > 0 else round(total, 2)
+            batch_text = str(batches_required) if idx == 0 and batch_size > 0 else ""
+
+            pdf.set_x(x)
+            pdf.cell(col_width * 0.38, cell_height, ingredient[:20], 1)
+            pdf.cell(col_width * 0.14, cell_height, str(meal_quantity), 1)
+            pdf.cell(col_width * 0.36, cell_height, str(batch_total), 1)
+            pdf.cell(col_width * 0.12, cell_height, batch_text, 1)
+            pdf.ln(cell_height)
+
+        column_heights[current_column] = pdf.get_y() + padding_after_table
 
     filename_date = datetime.today().strftime("%d-%m-%Y")
     pdf_path = f"daily_production_report_{filename_date}.pdf"
