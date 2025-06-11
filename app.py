@@ -168,7 +168,59 @@ if uploaded_file:
         "Pepper": 0.5,
         "Napoli Sauce": 70
     }
-}
+},
+        "Beef Burrito Bowl": {
+    "batch": 130,
+    "ingredients": {
+        "Beef Mince": 95,
+        "Onion": 12,
+        "Capsicum": 12,
+        "Vegetable Oil": 2,
+        "Taco Seasoning": 7,
+        "Salt": 1.5,
+        "Pepper": 0.5,
+        "Beef Stock": 40
+    }
+},
+        "Beef Meatballs": {
+    "batch": 0,
+    "ingredients": {
+        "Mince": 150,
+        "Onion": 10,
+        "Parsley": 3,
+        "Salt": 1.5,
+        "Pepper": 0.2
+    }
+        },
+        "Lebanese Beef Stew": {
+    "batch": 80,
+    "ingredients": {
+        "Chuck Diced": 97,
+        "Onion": 30,
+        "Carrot": 30,
+        "Potato": 30,
+        "Peas": 30,
+        "Oil": 2,
+        "Salt": 2.5,
+        "Pepper": 0.5,
+        "Tomato Paste": 20,
+        "Water": 30,
+        "Beef Stock": 30,
+        "Rice": 130
+    }
+},
+        "Mongolian Beef": {
+    "batch": 0,
+    "ingredients": {
+        "Chuck": 97,
+        "Baking Soda": 2.5,
+        "Water": 10,
+        "Soy Sauce": 5,
+        "Cornflour": 2.5
+    }
+},
+        
+
     }
 
     meal_column_heights = [pdf.get_y(), pdf.get_y()]
