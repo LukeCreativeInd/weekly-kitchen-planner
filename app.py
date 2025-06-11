@@ -219,7 +219,36 @@ if uploaded_file:
         "Cornflour": 2.5
     }
 },
-        
+     "Chicken With Vegetables": {
+    "batch": 0,
+    "ingredients": {
+        "Chicken": 135,
+        "Corn": 52,
+        "Beans": 60,
+        "Broccoli": 67
+    }
+},
+        "Chicken Sweet Potato and Beans": {
+    "batch": 0,
+    "ingredients": {
+        "Chicken": 135,
+        "Beans": 60
+    }
+},
+"Naked Chicken Parma": {
+    "batch": 0,
+    "ingredients": {
+        "Chicken": 150
+    }
+},
+        "Chicken Pesto Pasta": {
+    "batch": 0,
+    "ingredients": {
+        "Chicken": 130,
+        "Penne": 59,
+        "Sundried Tomatos": 24
+    }
+}
 
     }
 
