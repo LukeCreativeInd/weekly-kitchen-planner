@@ -124,17 +124,17 @@ if uploaded_file:
         "Spaghetti Bolognese": {
             "batch": 0,
             "ingredients": {
-                "Beef Mince": 120,
-                "Celery": 42,
-                "Carrot": 42,
-                "Onion": 42,
-                "Crushed Tomato": 130,
-                "Tomato Paste": 13,
-                "Garlic": 2,
-                "Salt": 0.8,
-                "Oil": 13,
-                "Water": 13,
-                "Spaghetti": 130
+                "Beef Mince": 100,
+                "Napoli Sauce": 65,
+                "Crushed Tomatoes": 45,
+                "Beef Stock": 30,
+                "Onion": 15,
+                "Zucchini": 15,
+                "Carrot": 15,
+                "Vegetable Oil": 1,
+                "Salt": 2,
+                "Pepper": 0.5,
+                "Spaghetti": 68
             }
         }
     }
