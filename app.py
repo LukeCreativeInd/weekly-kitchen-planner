@@ -149,9 +149,9 @@ if uploaded_file:
         "Soy Sauce": 13,
         "Oyster Sauce": 13,
         "Rice": 130
-    }, 
+    }
            
-}
+},
         "Shepherd's Pie": {
     "batch": 82,
     "ingredients": {
