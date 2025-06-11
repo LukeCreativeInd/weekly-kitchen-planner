@@ -122,7 +122,7 @@ if uploaded_file:
 
     meal_recipes = {
         "Spaghetti Bolognese": {
-            "batch": 0,
+            "batch": 90,
             "ingredients": {
                 "Beef Mince": 100,
                 "Napoli Sauce": 65,
