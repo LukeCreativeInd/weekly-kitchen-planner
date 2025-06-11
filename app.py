@@ -248,7 +248,31 @@ if uploaded_file:
         "Penne": 59,
         "Sundried Tomatos": 24
     }
+},
+        "Chicken and Broccoli Pasta": {
+    "batch": 0,
+    "ingredients": {
+        "Chicken": 130,
+        "Penne": 59,
+        "Broccoli": 40
+    }
+},
+"Butter Chicken": {
+    "batch": 0,
+    "ingredients": {
+        "Chicken": 140,
+        "Peas": 40,
+        "Rice": 130
+    }
+},
+"Thai Green Chicken Curry": {
+    "batch": 0,
+    "ingredients": {
+        "Chicken": 140,
+        "Rice": 130
+    }
 }
+
 
     }
 
