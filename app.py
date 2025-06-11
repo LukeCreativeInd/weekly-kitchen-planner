@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 import math
@@ -82,69 +83,9 @@ if uploaded_file:
     column_x = [left_margin, left_margin + col_width + 10]
     current_column = 0
 
-    def draw_bulk_section(column_index, section):
-        x = column_x[column_index]
-        y = column_heights[column_index]
-        pdf.set_xy(x, y)
-
-        section_title = section["title"]
-        batch_ingredient = section["batch_ingredient"]
-        batch_size = section["batch_size"]
-        ingredients = section["ingredients"]
-        source_meals = section["meals"]
-        amount = sum(meal_totals.get(meal.upper(), 0) for meal in source_meals)
-
-        pdf.set_font("Arial", "B", 11)
-        pdf.set_fill_color(230, 230, 230)
-        pdf.cell(col_width, cell_height, section_title, ln=1, fill=True)
-
-        pdf.set_x(x)
-        pdf.set_font("Arial", "B", 8)
-        pdf.cell(col_width * 0.4, cell_height, "Ingredient", 1)
-        pdf.cell(col_width * 0.15, cell_height, "Quantity", 1)
-        pdf.cell(col_width * 0.15, cell_height, "Meals", 1)
-        pdf.cell(col_width * 0.15, cell_height, "Batch Total", 1)
-        pdf.cell(col_width * 0.15, cell_height, "Batches", 1)
-        pdf.ln(cell_height)
-
-        pdf.set_font("Arial", "", 8)
-        batches_required = math.ceil(amount / batch_size) if batch_size > 0 else 0
-
-        for ingredient, qty_per_meal in ingredients.items():
-            total = qty_per_meal * amount
-            adjusted_total = round(total / batches_required) if batch_size > 0 and batches_required > 0 else round(total, 2)
-            batches = batches_required if batch_size > 0 and ingredient == batch_ingredient else ""
-
-            pdf.set_x(x)
-            pdf.cell(col_width * 0.4, cell_height, ingredient[:20], 1)
-            pdf.cell(col_width * 0.15, cell_height, str(qty_per_meal), 1)
-            pdf.cell(col_width * 0.15, cell_height, str(amount), 1)
-            pdf.cell(col_width * 0.15, cell_height, str(adjusted_total), 1)
-            pdf.cell(col_width * 0.15, cell_height, str(batches), 1)
-            pdf.ln(cell_height)
-
-        column_heights[column_index] = pdf.get_y() + padding_after_table
-
-    for section in bulk_sections:
-        estimated_height = column_heights[current_column] + (len(section["ingredients"]) + 2) * cell_height + padding_after_table
-        if estimated_height > 270:
-            current_column = 1 - current_column
-        draw_bulk_section(current_column, section)
-
-    # ----------------------------
-    # Start Meal Recipes on New Page
-    # ----------------------------
-    pdf.add_page()
-    pdf.set_font("Arial", "B", 14)
-    pdf.cell(0, 10, "Meal Recipes", ln=True, align="C")
-    pdf.ln(5)
-
-    meal_column_heights = [pdf.get_y(), pdf.get_y()]
-    meal_current_column = 0
-
     def draw_meal_recipe(column_index, meal_name, data):
         x = column_x[column_index]
-        y = meal_column_heights[column_index]
+        y = column_heights[column_index]
         pdf.set_xy(x, y)
 
         batch_ingredient = data["batch_ingredient"]
@@ -153,39 +94,40 @@ if uploaded_file:
         total_meals = meal_totals.get(meal_name.upper(), 0)
         batches_required = math.ceil(total_meals / batch_size) if batch_size > 0 else 0
 
-        # Header
         pdf.set_font("Arial", "B", 11)
         pdf.set_fill_color(230, 230, 230)
-        pdf.cell(col_width, cell_height, meal_name, ln=1, fill=True)
+        pdf.cell(col_width, cell_height, meal_name, ln=True, fill=True)
         pdf.set_x(x)
         pdf.set_font("Arial", "B", 8)
-        pdf.cell(col_width * 0.4, cell_height, "Ingredient", 1)
-        pdf.cell(col_width * 0.2, cell_height, "Meals", 1)
+        pdf.cell(col_width * 0.3, cell_height, "Ingredient", 1)
+        pdf.cell(col_width * 0.15, cell_height, "Quantity", 1)
+        pdf.cell(col_width * 0.15, cell_height, "Meals", 1)
         pdf.cell(col_width * 0.25, cell_height, "Batch Total", 1)
         pdf.cell(col_width * 0.15, cell_height, "Batch", 1)
         pdf.ln(cell_height)
 
-        # Rows
         pdf.set_font("Arial", "", 8)
         for i, (ingredient, qty) in enumerate(ingredients.items()):
-            batch_total = round(qty * total_meals / batches_required) if batch_size > 0 and batches_required > 0 else round(qty * total_meals, 2)
+            total_qty = round(qty * total_meals, 2)
+            batch_total = round(total_qty / batches_required) if batch_size > 0 and batches_required > 0 else total_qty
             batch_cell = str(batches_required) if i == 0 and batch_size > 0 else ""
             pdf.set_x(x)
-            pdf.cell(col_width * 0.4, cell_height, ingredient[:20], 1)
-            pdf.cell(col_width * 0.2, cell_height, str(total_meals), 1)
+            pdf.cell(col_width * 0.3, cell_height, ingredient[:20], 1)
+            pdf.cell(col_width * 0.15, cell_height, str(total_qty), 1)
+            pdf.cell(col_width * 0.15, cell_height, str(total_meals), 1)
             pdf.cell(col_width * 0.25, cell_height, str(batch_total), 1)
             pdf.cell(col_width * 0.15, cell_height, batch_cell, 1)
             pdf.ln(cell_height)
 
-        meal_column_heights[column_index] = pdf.get_y() + padding_after_table
+        column_heights[column_index] = pdf.get_y() + padding_after_table
 
+    pdf.add_page()
     for meal_name, data in meal_recipes.items():
-        est_height = meal_column_heights[meal_current_column] + (len(data["ingredients"]) + 2) * cell_height + padding_after_table
+        est_height = column_heights[current_column] + (len(data["ingredients"]) + 2) * cell_height + padding_after_table
         if est_height > 270:
-            meal_current_column = 1 - meal_current_column
-        draw_meal_recipe(meal_current_column, meal_name, data)
+            current_column = 1 - current_column
+        draw_meal_recipe(current_column, meal_name, data)
 
-    # Save and download
     filename_date = datetime.today().strftime("%d-%m-%Y")
     pdf_path = f"daily_production_report_{filename_date}.pdf"
     pdf.output(pdf_path)
