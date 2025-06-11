@@ -271,7 +271,27 @@ if uploaded_file:
         "Chicken": 140,
         "Rice": 130
     }
+},
+        "Moroccan Chicken": {
+    "batch": 0,
+    "ingredients": {
+        "Chicken": 180
+    },
+    "sub_section": {
+        "title": "Chickpea Recipe",
+        "ingredients": {
+            "Onion": 20,
+            "Zucchini": 30,
+            "Red Capsicum": 30,
+            "Garlic": 2,
+            "Oil": 2,
+            "Chickpeas": 115,
+            "Mix Spices": 1.7,
+            "Chicken Stock": 50
+        }
+    }
 }
+
 
 
     }
