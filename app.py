@@ -80,8 +80,8 @@ if uploaded_file:
         pdf.cell(col_width * 0.4, cell_height, "Ingredient", 1)
         pdf.cell(col_width * 0.15, cell_height, "Quantity", 1)
         pdf.cell(col_width * 0.15, cell_height, "Meals", 1)
-        pdf.cell(col_width * 0.15, cell_height, "Batch Total", 1)
-        pdf.cell(col_width * 0.15, cell_height, "Batches", 1)
+        pdf.cell(col_width * 0.2, cell_height, "Batch Total", 1)
+        pdf.cell(col_width * 0.1, cell_height, "Batches", 1)
         pdf.ln(cell_height)
 
         pdf.set_font("Arial", "", 8)
@@ -99,8 +99,8 @@ if uploaded_file:
             pdf.cell(col_width * 0.4, cell_height, ingredient[:20], 1)
             pdf.cell(col_width * 0.15, cell_height, str(qty_per_meal), 1)
             pdf.cell(col_width * 0.15, cell_height, str(amount), 1)
-            pdf.cell(col_width * 0.15, cell_height, str(adjusted_total), 1)
-            pdf.cell(col_width * 0.15, cell_height, str(batches), 1)
+            pdf.cell(col_width * 0.2, cell_height, str(adjusted_total), 1)
+            pdf.cell(col_width * 0.1, cell_height, str(batches), 1)
             pdf.ln(cell_height)
 
         column_heights[column_index] = pdf.get_y() + padding_after_table
