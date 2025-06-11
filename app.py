@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import math
@@ -90,7 +89,10 @@ if uploaded_file:
 
         for ingredient, qty_per_meal in ingredients.items():
             total = qty_per_meal * amount
-            adjusted_total = round(total / batches_required) if batch_size > 0 and batches_required > 0 else round(total, 2)
+            if batch_size > 0 and batches_required > 0:
+                adjusted_total = round(total / batches_required)
+            else:
+                adjusted_total = round(total, 2)
             batches = batches_required if batch_size > 0 and ingredient == batch_ingredient else ""
 
             pdf.set_x(x)
@@ -147,7 +149,7 @@ if uploaded_file:
         ingredients = data["ingredients"]
         batch_value = data.get("batch", 0)
         total_meals = meal_totals.get(meal_name.upper(), 0)
-        batches_required = math.ceil(total_meals / batch_value) if batch_value > 0 else 0
+        batches = math.ceil(total_meals / batch_value) if batch_value > 0 else ""
 
         pdf.set_font("Arial", "B", 11)
         pdf.set_fill_color(230, 230, 230)
@@ -164,14 +166,15 @@ if uploaded_file:
 
         pdf.set_font("Arial", "", 8)
         for i, (ingredient, qty) in enumerate(ingredients.items()):
-            batch_total = round((qty * total_meals) / batch_value, 2) if batch_value > 0 else 0
-            batch_cell = str(batches_required) if i == 0 and batch_value > 0 else ""
+            total_ingredient_qty = qty * total_meals
+            batch_total = round(total_ingredient_qty / batch_value, 2) if batch_value > 0 else 0
+            batch_label = str(batches) if i == 0 else ""
             pdf.set_x(x)
             pdf.cell(col_width * 0.3, cell_height, ingredient[:20], 1)
             pdf.cell(col_width * 0.15, cell_height, str(qty), 1)
             pdf.cell(col_width * 0.15, cell_height, str(total_meals), 1)
             pdf.cell(col_width * 0.25, cell_height, str(batch_total), 1)
-            pdf.cell(col_width * 0.15, cell_height, batch_cell, 1)
+            pdf.cell(col_width * 0.15, cell_height, batch_label, 1)
             pdf.ln(cell_height)
 
         meal_column_heights[column_index] = pdf.get_y() + padding_after_table
