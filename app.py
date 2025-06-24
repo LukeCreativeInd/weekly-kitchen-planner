@@ -27,10 +27,14 @@ bulk_sections = [
 # Streamlit App
 # ----------------------------
 st.title("\U0001F4E6 Bulk Ingredient Summary Report")
-uploaded_file = st.file_uploader("Upload Production CSV (Product name, Quantity)", type="csv")
+uploaded_file = st.file_uploader("Upload Production File (CSV or Excel)", type=["csv", "xlsx"])
 
 if uploaded_file:
+    if uploaded_file.name.endswith(".csv"):
     df = pd.read_csv(uploaded_file)
+     else:
+    df = pd.read_excel(uploaded_file)
+
     df.columns = df.columns.str.strip().str.lower()
     if not {"product name", "quantity"}.issubset(df.columns):
         st.error("CSV must contain 'Product name' and 'Quantity' columns.")
