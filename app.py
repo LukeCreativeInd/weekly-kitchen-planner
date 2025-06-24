@@ -32,7 +32,7 @@ uploaded_file = st.file_uploader("Upload Production File (CSV or Excel)", type=[
 if uploaded_file:
     if uploaded_file.name.endswith(".csv"):
     df = pd.read_csv(uploaded_file)
-     else:
+    else:
     df = pd.read_excel(uploaded_file)
 
     df.columns = df.columns.str.strip().str.lower()
