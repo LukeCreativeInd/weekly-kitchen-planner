@@ -231,45 +231,49 @@ if uploaded_file:
                 y0=pdf.get_y();heights=[y0,y0];col=0
         draw_sauce(col,name,data)
 
+        # ------------------
+    # Page4: To Pack In Fridge
     # ------------------
-# Page4: To Pack In Fridge
-# ------------------
-pdf.add_page()
-pdf.set_font("Arial","B",14)
-pdf.cell(0,10,"To Pack In Fridge",ln=1,align='C')
-pdf.ln(5)
+    pdf.add_page()
+    pdf.set_font("Arial","B",14)
+    pdf.cell(0,10,"To Pack In Fridge",ln=1,align='C')
+    pdf.ln(5)
 
-sauce_prep = [
-    ("MONGOLIAN", 70, "MONGOLIAN BEEF"),
-    ("MEATBALLS", 120, "BEEF MEATBALLS"),
-    ("LEMON", 50, "ROASTED LEMON CHICKEN"),
-    ("MUSHROOM", 100, "STEAK WITH MUSHROOM SAUCE"),
-    ("FAJITA SAUCE", 33, "CHICKEN FAJITA BOWL"),
-    ("BURRITO SAUCE", 43, "BEEF BURRITO BOWL")
-]
+    sauce_prep = [
+        ("MONGOLIAN", 70, "MONGOLIAN BEEF"),
+        ("MEATBALLS", 120, "BEEF MEATBALLS"),
+        ("LEMON", 50, "ROASTED LEMON CHICKEN"),
+        ("MUSHROOM", 100, "STEAK WITH MUSHROOM SAUCE"),
+        ("FAJITA SAUCE", 33, "CHICKEN FAJITA BOWL"),
+        ("BURRITO SAUCE", 43, "BEEF BURRITO BOWL")
+    ]
 
-# Header row
-x = left
-pdf.set_xy(x, pdf.get_y())
-pdf.set_font("Arial","B",8)
-pdf.cell(col_w*0.4, ch, "Sauce", 1)
-pdf.cell(col_w*0.2, ch, "Quantity", 1)
-pdf.cell(col_w*0.2, ch, "Amount", 1)
-pdf.cell(col_w*0.2, ch, "Total", 1)
-pdf.ln(ch)
-
-pdf.set_font("Arial","",8)
-for sauce, qty, meal_key in sauce_prep:
-    amount = meal_totals.get(meal_key.upper(), 0)
-    total = qty * amount
-    pdf.set_x(x)
-    pdf.cell(col_w*0.4, ch, sauce, 1)
-    pdf.cell(col_w*0.2, ch, str(qty), 1)
-    pdf.cell(col_w*0.2, ch, str(amount), 1)
-    pdf.cell(col_w*0.2, ch, str(total), 1)
+    # Header row
+    x = left
+    pdf.set_xy(x, pdf.get_y())
+    pdf.set_font("Arial","B",8)
+    pdf.cell(col_w*0.4, ch, "Sauce", 1)
+    pdf.cell(col_w*0.2, ch, "Quantity", 1)
+    pdf.cell(col_w*0.2, ch, "Amount", 1)
+    pdf.cell(col_w*0.2, ch, "Total", 1)
     pdf.ln(ch)
 
-# Save & download
+    pdf.set_font("Arial","",8)
+    for sauce, qty, meal_key in sauce_prep:
+        amount = meal_totals.get(meal_key.upper(), 0)
+        total = qty * amount
+        pdf.set_x(x)
+        pdf.cell(col_w*0.4, ch, sauce, 1)
+        pdf.cell(col_w*0.2, ch, str(qty), 1)
+        pdf.cell(col_w*0.2, ch, str(amount), 1)
+        pdf.cell(col_w*0.2, ch, str(total), 1)
+        pdf.ln(ch)
+
+    # Save & download
+    fname = f"daily_production_report_{datetime.today().strftime('%d-%m-%Y')}.pdf"
+    pdf.output(fname)
+    with open(fname, "rb") as f:
+        st.download_button("📄 Download Bulk Order PDF", f, file_name=fname, mime="application/pdf")
     fname=f"daily_production_report_{datetime.today().strftime('%d-%m-%Y')}.pdf"
     pdf.output(fname)
     with open(fname,"rb") as f:st.download_button("📄 Download Bulk Order PDF",f,file_name=fname,mime="application/pdf")
