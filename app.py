@@ -274,6 +274,3 @@ if uploaded_file:
     pdf.output(fname)
     with open(fname, "rb") as f:
         st.download_button("📄 Download Bulk Order PDF", f, file_name=fname, mime="application/pdf")
-    fname=f"daily_production_report_{datetime.today().strftime('%d-%m-%Y')}.pdf"
-    pdf.output(fname)
-    with open(fname,"rb") as f:st.download_button("📄 Download Bulk Order PDF",f,file_name=fname,mime="application/pdf")
