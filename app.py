@@ -24,334 +24,87 @@ bulk_sections = [
 ]
 
 # ----------------------------
-# Streamlit App
+# SAUCE SECTION DEFINITIONS
 # ----------------------------
-st.title("\U0001F4E6 Bulk Ingredient Summary Report")
-uploaded_file = st.file_uploader("Upload Production File (CSV or Excel)", type=["csv", "xlsx"])
-
-if uploaded_file:
-  if uploaded_file.name.endswith(".csv"):
-    df = pd.read_csv(uploaded_file)
-  else:
-    df = pd.read_excel(uploaded_file)
-
-    df.columns = df.columns.str.strip().str.lower()
-    if not {"product name", "quantity"}.issubset(df.columns):
-        st.error("CSV must contain 'Product name' and 'Quantity' columns.")
-        st.stop()
-
-    st.success("CSV uploaded successfully!")
-    st.dataframe(df)
-
-    meal_totals = dict(zip(df["product name"].str.upper(), df["quantity"]))
-
-    pdf = FPDF()
-    pdf.set_auto_page_break(auto=True, margin=10)
-    pdf.add_page()
-    pdf.set_font("Arial", "B", 14)
-    report_date = datetime.today().strftime("%d/%m/%Y")
-    pdf.cell(0, 10, f"Daily Production Report - {report_date}", ln=True, align="C")
-    pdf.ln(5)
-
-    left_margin = 10
-    page_width = 210 - 2 * left_margin
-    col_width = page_width / 2 - 5
-    cell_height = 6
-    padding_after_table = 4
-
-    column_heights = [pdf.get_y(), pdf.get_y()]
-    column_x = [left_margin, left_margin + col_width + 10]
-    current_column = 0
-
-    def draw_section(column_index, section):
-        x = column_x[column_index]
-        y = column_heights[column_index]
-        pdf.set_xy(x, y)
-
-        section_title = section["title"]
-        batch_ingredient = section["batch_ingredient"]
-        batch_size = section["batch_size"]
-        ingredients = section["ingredients"]
-        source_meals = section["meals"]
-        amount = sum(meal_totals.get(meal.upper(), 0) for meal in source_meals)
-
-        pdf.set_font("Arial", "B", 11)
-        pdf.set_fill_color(230, 230, 230)
-        pdf.cell(col_width, cell_height, section_title, ln=1, fill=True)
-
-        pdf.set_x(x)
-        pdf.set_font("Arial", "B", 8)
-        pdf.cell(col_width * 0.4, cell_height, "Ingredient", 1)
-        pdf.cell(col_width * 0.15, cell_height, "Quantity", 1)
-        pdf.cell(col_width * 0.15, cell_height, "Amount", 1)
-        pdf.cell(col_width * 0.15, cell_height, "Total", 1)
-        pdf.cell(col_width * 0.15, cell_height, "Batches", 1)
-        pdf.ln(cell_height)
-
-        pdf.set_font("Arial", "", 8)
-        batches_required = math.ceil(amount / batch_size) if batch_size > 0 else 0
-
-        for ingredient, qty_per_meal in ingredients.items():
-            total = qty_per_meal * amount
-            if batch_size > 0 and batches_required > 0:
-                adjusted_total = round(total / batches_required)
-            else:
-                adjusted_total = round(total, 2)
-            batches = batches_required if batch_size > 0 and ingredient == batch_ingredient else ""
-
-            pdf.set_x(x)
-            pdf.cell(col_width * 0.4, cell_height, ingredient[:20], 1)
-            pdf.cell(col_width * 0.15, cell_height, str(qty_per_meal), 1)
-            pdf.cell(col_width * 0.15, cell_height, str(amount), 1)
-            pdf.cell(col_width * 0.15, cell_height, str(adjusted_total), 1)
-            pdf.cell(col_width * 0.15, cell_height, str(batches), 1)
-            pdf.ln(cell_height)
-
-        column_heights[column_index] = pdf.get_y() + padding_after_table
-
-    for section in bulk_sections:
-        estimated_height = column_heights[current_column] + (len(section["ingredients"]) + 2) * cell_height + padding_after_table
-        if estimated_height > 270:
-            current_column = 1 - current_column
-        draw_section(current_column, section)
-
-    # ----------------------------
-    # Meal Recipes (Page 2)
-    # ----------------------------
-    pdf.add_page()
-    pdf.set_font("Arial", "B", 14)
-    pdf.cell(0, 10, "Meal Recipes", ln=True, align="C")
-    pdf.ln(5)
-
-    meal_recipes = {
-        "Spaghetti Bolognese": {
-            "batch": 90,
-            "ingredients": {
-                "Beef Mince": 100,
-                "Napoli Sauce": 65,
-                "Crushed Tomatoes": 45,
-                "Beef Stock": 30,
-                "Onion": 15,
-                "Zucchini": 15,
-                "Carrot": 15,
-                "Vegetable Oil": 1,
-                "Salt": 2,
-                "Pepper": 0.5,
-                "Spaghetti": 68
-            }
-        },
-       "Beef Chow Mein": {
-        "batch": 80,
+sauce_sections = [
+    {
+        "title": "Thai Sauce",
+        "meal": "THAI GREEN CHICKEN CURRY",
         "ingredients": {
-        "Beef Mince": 120,
-        "Celery": 42,
-        "Carrot": 42,
-        "Cabbage": 42,
-        "Onion": 42,
-        "Oil": 2,
-        "Pepper": 0.8,
-        "Soy Sauce": 13,
-        "Oyster Sauce": 13,
-        "Rice": 130
-    }
-           
-},
-        "Shepherd's Pie": {
-    "batch": 82,
-    "ingredients": {
-        "Beef Mince": 100,
-        "Oil": 2,
-        "Carrots": 15,
-        "Capsicum": 15,
-        "Onion": 15,
-        "Mushroom": 15,
-        "Peas": 15,
-        "Tomato Paste": 6,
-        "Beef Stock": 20,
-        "Salt": 2,
-        "Pepper": 0.5,
-        "Napoli Sauce": 70
-    }
-},
-        "Beef Burrito Bowl": {
-    "batch": 130,
-    "ingredients": {
-        "Beef Mince": 95,
-        "Onion": 12,
-        "Capsicum": 12,
-        "Vegetable Oil": 2,
-        "Taco Seasoning": 7,
-        "Salt": 1.5,
-        "Pepper": 0.5,
-        "Beef Stock": 40
-    }
-},
-        "Beef Meatballs": {
-    "batch": 0,
-    "ingredients": {
-        "Mince": 150,
-        "Onion": 10,
-        "Parsley": 3,
-        "Salt": 1.5,
-        "Pepper": 0.2
-    }
-        },
-        "Lebanese Beef Stew": {
-    "batch": 80,
-    "ingredients": {
-        "Chuck Diced": 97,
-        "Onion": 30,
-        "Carrot": 30,
-        "Potato": 30,
-        "Peas": 30,
-        "Oil": 2,
-        "Salt": 2.5,
-        "Pepper": 0.5,
-        "Tomato Paste": 20,
-        "Water": 30,
-        "Beef Stock": 30,
-        "Rice": 130
-    }
-},
-        "Mongolian Beef": {
-    "batch": 0,
-    "ingredients": {
-        "Chuck": 97,
-        "Baking Soda": 2.5,
-        "Water": 10,
-        "Soy Sauce": 5,
-        "Cornflour": 2.5
-    }
-},
-     "Chicken With Vegetables": {
-    "batch": 0,
-    "ingredients": {
-        "Chicken": 135,
-        "Corn": 52,
-        "Beans": 60,
-        "Broccoli": 67
-    }
-},
-        "Chicken Sweet Potato and Beans": {
-    "batch": 0,
-    "ingredients": {
-        "Chicken": 135,
-        "Beans": 60
-    }
-},
-"Naked Chicken Parma": {
-    "batch": 0,
-    "ingredients": {
-        "Chicken": 150
-    }
-},
-        "Chicken Pesto Pasta": {
-    "batch": 0,
-    "ingredients": {
-        "Chicken": 130,
-        "Penne": 59,
-        "Sundried Tomatos": 24
-    }
-},
-        "Chicken and Broccoli Pasta": {
-    "batch": 0,
-    "ingredients": {
-        "Chicken": 130,
-        "Penne": 59,
-        "Broccoli": 40
-    }
-},
-"Butter Chicken": {
-    "batch": 0,
-    "ingredients": {
-        "Chicken": 140,
-        "Peas": 40,
-        "Rice": 130
-    }
-},
-"Thai Green Chicken Curry": {
-    "batch": 0,
-    "ingredients": {
-        "Chicken": 140,
-        "Rice": 130
-    }
-},
-        "Moroccan Chicken": {
-    "batch": 0,
-    "ingredients": {
-        "Chicken": 180
+            "Green Curry Paste": 7,
+            "Coconut Cream": 82
+        }
     },
-    "sub_section": {
-        "title": "Chickpea Recipe",
+    {
+        "title": "Lamb Sauce",
+        "meal": "LAMB SOUVLAKI",
         "ingredients": {
-            "Onion": 20,
-            "Zucchini": 30,
-            "Red Capsicum": 30,
+            "Greek Yogurt": 20,
             "Garlic": 2,
-            "Oil": 2,
-            "Chickpeas": 115,
-            "Mix Spices": 1.7,
-            "Chicken Stock": 50
+            "Salt": 1
         }
     }
+]
+
+# Placeholders for additional logic to integrate with Streamlit or production data.
+# You would replace these with dynamic values coming from user input or uploaded files.
+meal_totals = {
+    "THAI GREEN CHICKEN CURRY": 82,
+    "LAMB SOUVLAKI": 91
 }
 
+# PDF Creation (used in Streamlit or standalone PDF report generation)
+class PDF(FPDF):
+    def header(self):
+        self.set_font("Arial", "B", 12)
+        self.cell(0, 10, "Sauce Recipes", 0, 1, "C")
+        self.ln(2)
 
+pdf = PDF()
+pdf.set_auto_page_break(auto=True, margin=10)
+pdf.add_page()
+pdf.set_font("Arial", "", 10)
 
-    }
+left_margin = 10
+page_width = 210 - 2 * left_margin
+col_width = page_width / 2 - 5
+cell_height = 6
+padding_after_table = 4
+column_heights = [pdf.get_y(), pdf.get_y()]
+column_x = [left_margin, left_margin + col_width + 10]
+current_column = 0
 
-    meal_column_heights = [pdf.get_y(), pdf.get_y()]
-    meal_current_column = 0
+def draw_sauce_section(column_index, title, ingredients_dict, total_meals):
+    x = column_x[column_index]
+    y = column_heights[column_index]
+    pdf.set_xy(x, y)
 
-    def draw_meal_recipe(column_index, meal_name, data):
-        x = column_x[column_index]
-        y = meal_column_heights[column_index]
-        pdf.set_xy(x, y)
+    pdf.set_font("Arial", "B", 11)
+    pdf.set_fill_color(230, 230, 230)
+    pdf.cell(col_width, cell_height, title, ln=1, fill=True)
 
-        ingredients = data["ingredients"]
-        batch_value = data.get("batch", 0)
-        total_meals = meal_totals.get(meal_name.upper(), 0)
-        batches = math.ceil(total_meals / batch_value) if batch_value > 0 else ""
+    pdf.set_x(x)
+    pdf.set_font("Arial", "B", 8)
+    pdf.cell(col_width * 0.4, cell_height, "Ingredient", 1)
+    pdf.cell(col_width * 0.2, cell_height, "Meal Amt", 1)
+    pdf.cell(col_width * 0.2, cell_height, "Total Meals", 1)
+    pdf.cell(col_width * 0.2, cell_height, "Required", 1)
+    pdf.ln(cell_height)
 
-        pdf.set_font("Arial", "B", 11)
-        pdf.set_fill_color(230, 230, 230)
-        pdf.cell(col_width, cell_height, meal_name, ln=1, fill=True)
-
+    pdf.set_font("Arial", "", 8)
+    for ingredient, meal_amt in ingredients_dict.items():
+        required = meal_amt * total_meals
         pdf.set_x(x)
-        pdf.set_font("Arial", "B", 8)
-        pdf.cell(col_width * 0.3, cell_height, "Ingredient", 1)
-        pdf.cell(col_width * 0.15, cell_height, "Quantity", 1)
-        pdf.cell(col_width * 0.15, cell_height, "Meals", 1)
-        pdf.cell(col_width * 0.25, cell_height, "Batch Total", 1)
-        pdf.cell(col_width * 0.15, cell_height, "Batch", 1)
+        pdf.cell(col_width * 0.4, cell_height, ingredient[:20], 1)
+        pdf.cell(col_width * 0.2, cell_height, str(meal_amt), 1)
+        pdf.cell(col_width * 0.2, cell_height, str(total_meals), 1)
+        pdf.cell(col_width * 0.2, cell_height, str(required), 1)
         pdf.ln(cell_height)
 
-        pdf.set_font("Arial", "", 8)
-        for i, (ingredient, qty) in enumerate(ingredients.items()):
-            total_ingredient_qty = qty * total_meals
-            
-            total_quantity = qty * total_meals
-            num_batches = math.ceil(total_meals / batch_value) if batch_value > 0 else 0
-            batch_total = round(total_quantity / num_batches) if num_batches > 0 else 0
-            batch_label = str(batches) if i == 0 else ""
-            pdf.set_x(x)
-            pdf.cell(col_width * 0.3, cell_height, ingredient[:20], 1)
-            pdf.cell(col_width * 0.15, cell_height, str(qty), 1)
-            pdf.cell(col_width * 0.15, cell_height, str(total_meals), 1)
-            pdf.cell(col_width * 0.25, cell_height, str(batch_total), 1)
-            pdf.cell(col_width * 0.15, cell_height, batch_label, 1)
-            pdf.ln(cell_height)
+    column_heights[column_index] = pdf.get_y() + padding_after_table
 
-        meal_column_heights[column_index] = pdf.get_y() + padding_after_table
+for sauce in sauce_sections:
+    draw_sauce_section(current_column, sauce["title"], sauce["ingredients"], meal_totals.get(sauce["meal"], 0))
+    current_column = 1 - current_column
 
-    for meal_name, data in meal_recipes.items():
-        est_height = meal_column_heights[meal_current_column] + (len(data["ingredients"]) + 2) * cell_height + padding_after_table
-        if est_height > 270:
-            meal_current_column = 1 - meal_current_column
-        draw_meal_recipe(meal_current_column, meal_name, data)
-
-    filename_date = datetime.today().strftime("%d-%m-%Y")
-    pdf_path = f"daily_production_report_{filename_date}.pdf"
-    pdf.output(pdf_path)
-    with open(pdf_path, "rb") as f:
-        st.download_button("\U0001F4C4 Download Bulk Order PDF", f, file_name=pdf_path, mime="application/pdf")
+pdf.output("/mnt/data/final_sauce_sections.pdf")
