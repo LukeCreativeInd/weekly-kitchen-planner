@@ -225,7 +225,10 @@ for idx,(name,data) in enumerate(sauces.items()):
     heights3.append(pdf.get_y())
 pdf.set_xy(left, max(heights3)+pad)
 
-# Page4: To Pack In Fridge
+# To Pack In Fridge
+# position under Sauces section
+fridge_start = max(heights3) + pad
+pdf.set_xy(left, fridge_start)
 pdf.set_font("Arial","B",14)
 pdf.cell(0,10,"To Pack In Fridge",ln=1,align='C')
 pdf.ln(5)
