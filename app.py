@@ -158,7 +158,7 @@ if uploaded_file:
         pdf.set_xy(x,y)
         pdf.set_font("Arial","B",11)
         pdf.set_fill_color(230,230,230)
-        pdf.cell(col_w,ch,name,ln=1,(fill=True))
+        pdf.cell(col_w,ch,name,ln=1,fill=True)
         pdf.set_x(x)
         pdf.set_font("Arial","B",8)
         for h,w in [("Ingredient",0.3),("Qty/Meal",0.15),("Meals",0.15),("Batch Total",0.25),("Batch",0.15)]:
