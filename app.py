@@ -299,9 +299,15 @@ pdf.cell(col_w*0.15,ch,bl,1); pdf.ln(ch)
             pdf.cell(col_w*0.2, ch, str(round(total,2)), 1)
             pdf.cell(col_w*0.1, ch, str(batches), 1)
             pdf.ln(ch)
-# ------------------
+    # ------------------
     # Save & Download
     # ------------------
-    fname=f"daily_production_report_{datetime.today().strftime('%d-%m-%Y')}.pdf"
+    fname = f"daily_production_report_{datetime.today().strftime('%d-%m-%Y')}.pdf"
     pdf.output(fname)
-    with open(fname,"rb") as f: st.download_button("📄 Download Bulk Order PDF",f,file_name=fname,mime="application/pdf")
+    with open(fname, "rb") as f:
+        st.download_button(
+            label="📄 Download Bulk Order PDF",
+            data=f,
+            file_name=fname,
+            mime="application/pdf"
+        )
