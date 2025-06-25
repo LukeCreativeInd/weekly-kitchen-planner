@@ -170,42 +170,58 @@ if uploaded_file:
         if est>270: meal_current_column = 1-meal_current_column
 
     # ----------------------------
-    # Page 3: Sauces
-    # ----------------------------
-    pdf.add_page()
-    pdf.set_font("Arial","B",14)
-    pdf.cell(0,10,"Sauces",ln=True,align="C")
-    pdf.ln(5)
+# Page 3: Sauces (2-column layout)
+# ----------------------------
+pdf.add_page()
+pdf.set_font("Arial","B",14)
+pdf.cell(0,10,"Sauces",ln=True,align="C")
+pdf.ln(5)
 
-    sauces = {
-        "Thai Sauce": {"ingredients":[("Green Curry Paste",7),("Coconut Cream",82)],"meal_key":"THAI GREEN CHICKEN CURRY"},
-        "Lamb Sauce": {"ingredients":[("Greek Yogurt",20),("Garlic",2),("Salt",1)],"meal_key":"LAMB SOUVLAKI"}
-    }
-    for sauce_name, sauce_data in sauces.items():
-        total_meals = meal_totals.get(sauce_data["meal_key"],0)
-        # Title
-        pdf.set_font("Arial","B",11)
-        pdf.set_fill_color(230,230,230)
-        pdf.cell(col_width*2+10,cell_height,sauce_name,ln=1,fill=True)
-        # Header row
-        pdf.set_x(left_margin)
-        pdf.set_font("Arial","B",8)
-        pdf.cell(col_width*0.5,cell_height,"Ingredient",1)
-        pdf.cell(col_width*0.25,cell_height,"Meal Amount",1)
-        pdf.cell(col_width*0.25,cell_height,"Total Meals",1)
-        pdf.cell(col_width*0.5,cell_height,"Required Ingredient",1)
+sauces = {
+    "Thai Sauce": {"ingredients": [("Green Curry Paste", 7), ("Coconut Cream", 82)], "meal_key": "THAI GREEN CHICKEN CURRY"},
+    "Lamb Sauce": {"ingredients": [("Greek Yogurt", 20), ("Garlic", 2), ("Salt", 1)], "meal_key": "LAMB SOUVLAKI"}
+}
+
+# Prepare two columns
+sauce_column_heights = [pdf.get_y(), pdf.get_y()]
+sauce_current_col = 0
+
+for sauce_name, sauce_data in sauces.items():
+    x = column_x[sauce_current_col]
+    y = sauce_column_heights[sauce_current_col]
+    pdf.set_xy(x, y)
+
+    # Title bar
+    pdf.set_font("Arial","B",11)
+    pdf.set_fill_color(230,230,230)
+    pdf.cell(col_width, cell_height, sauce_name, ln=1, fill=True)
+
+    # Header row
+    pdf.set_x(x)
+    pdf.set_font("Arial","B",8)
+    pdf.cell(col_width*0.3, cell_height, "Ingredient", 1)
+    pdf.cell(col_width*0.2, cell_height, "Meal Amount", 1)
+    pdf.cell(col_width*0.2, cell_height, "Total Meals", 1)
+    pdf.cell(col_width*0.3, cell_height, "Required Ingredient", 1)
+    pdf.ln(cell_height)
+
+    # Data rows
+    pdf.set_font("Arial","",8)
+    total_meals = meal_totals.get(sauce_data["meal_key"], 0)
+    for ing, amt in sauce_data["ingredients"]:
+        required = amt * total_meals
+        pdf.set_x(x)
+        pdf.cell(col_width*0.3, cell_height, ing[:20], 1)
+        pdf.cell(col_width*0.2, cell_height, str(amt), 1)
+        pdf.cell(col_width*0.2, cell_height, str(total_meals), 1)
+        pdf.cell(col_width*0.3, cell_height, str(required), 1)
         pdf.ln(cell_height)
-        # Rows
-        pdf.set_font("Arial","",8)
-        for ing, meal_amt in sauce_data["ingredients"]:
-            req = meal_amt * total_meals
-            pdf.set_x(left_margin)
-            pdf.cell(col_width*0.5,cell_height,ing[:20],1)
-            pdf.cell(col_width*0.25,cell_height,str(meal_amt),1)
-            pdf.cell(col_width*0.25,cell_height,str(total_meals),1)
-            pdf.cell(col_width*0.5,cell_height,str(req),1)
-            pdf.ln(cell_height)
-        pdf.ln(4)
+
+    # Update column height and switch if needed
+    sauce_column_heights[sauce_current_col] = pdf.get_y() + padding_after_table
+    next_est = sauce_column_heights[sauce_current_col] + (len(sauce_data["ingredients"]) + 2) * cell_height
+    if next_est > 270:
+        sauce_current_col = 1 - sauce_current_col
 
     # Output PDF
     filename_date = datetime.today().strftime("%d-%m-%Y")
