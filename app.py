@@ -243,10 +243,11 @@ if uploaded_file:
     pdf.cell(0,10,"To Pack In Fridge",ln=1,align='C')
     pdf.ln(5)
 
-    # Table heading: Sauces to Prepare
+        # Table heading: Sauces to Prepare
+    pdf.set_x(left)
     pdf.set_font("Arial","B",11)
     pdf.set_fill_color(230, 230, 230)
-    pdf.cell(0, ch, "Sauces to Prepare", ln=1, fill=True)
+    pdf.cell(col_w, ch, "Sauces to Prepare", ln=1, fill=True)
     pdf.ln(2)
 
     sauce_prep = [
