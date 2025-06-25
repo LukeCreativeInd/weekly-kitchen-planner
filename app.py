@@ -46,14 +46,13 @@ sauce_sections = [
     }
 ]
 
-# Placeholders for additional logic to integrate with Streamlit or production data.
-# You would replace these with dynamic values coming from user input or uploaded files.
+# Placeholders for total meal counts (should be replaced with uploaded CSV data in actual app)
 meal_totals = {
     "THAI GREEN CHICKEN CURRY": 82,
     "LAMB SOUVLAKI": 91
 }
 
-# PDF Creation (used in Streamlit or standalone PDF report generation)
+# PDF Creation
 class PDF(FPDF):
     def header(self):
         self.set_font("Arial", "B", 12)
@@ -107,4 +106,8 @@ for sauce in sauce_sections:
     draw_sauce_section(current_column, sauce["title"], sauce["ingredients"], meal_totals.get(sauce["meal"], 0))
     current_column = 1 - current_column
 
-pdf.output("/mnt/data/final_sauce_sections.pdf")
+# Save PDF using relative path for compatibility
+pdf_path = "final_sauce_sections.pdf"
+pdf.output(pdf_path)
+with open(pdf_path, "rb") as f:
+    st.download_button("\U0001F4C4 Download Sauce Section PDF", f, file_name=pdf_path, mime="application/pdf")
