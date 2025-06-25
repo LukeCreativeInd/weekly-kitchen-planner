@@ -322,16 +322,9 @@ pdf.ln(5)
 pdf.set_font("Arial","B",14)
 pdf.cell(0,10,"Chicken Mixing",ln=1,align='C')
 pdf.ln(5)
-# Mixing Tables
-mixes = [
-    ("Pesto", [("Chicken",110),("Sauce",80)], "CHICKEN PESTO PASTA", 50),
-    ("Butter Chicken", [("Chicken",120),("Sauce",90)], "BUTTER CHICKEN", 50),
-    ("Broccoli Pasta", [("Chicken",100),("Sauce",100)], "CHICKEN AND BROCCOLI PASTA", 50),
-    ("Thai", [("Chicken",110),("Sauce",90)], "THAI GREEN CHICKEN CURRY", 50),
-    ("Gnocchi", [("Gnocchi",150),("Chicken",80),("Sauce",200),("Spinach",25)], "CREAMY CHICKEN & MUSHROOM GNOCCHI", 36)
-]
-# initialize mixing columns from fridge bottom
-mix_heights = [fridge_heights[0], fridge_heights[1]]
+# initialize mixing columns below the heading
+mix_start_y = pdf.get_y()
+mix_heights = [mix_start_y, mix_start_y]
 mix_col = 0
 for mix_title, data_key, meal_key, divisor in mixes:
     # estimate block height
