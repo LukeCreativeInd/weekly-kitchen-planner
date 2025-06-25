@@ -241,12 +241,10 @@ for idx, (name, data) in enumerate(sauces.items()):
 pdf.set_xy(left, max(heights) + pad)
 
 # ------------------
-# To Pack In Fridge
+# To Pack In Fridge (moved under Sauces)
 # ------------------
-title4 = "To Pack In Fridge"
-pdf.add_page()
 pdf.set_font("Arial","B",14)
-pdf.cell(0,10,title4,ln=1,align='C')
+pdf.cell(0,10,"To Pack In Fridge",ln=1,align='C')
 pdf.ln(5)
 # Sauces to Prepare
 pdf.set_x(left)
