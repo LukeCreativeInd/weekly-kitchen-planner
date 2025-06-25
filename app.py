@@ -244,8 +244,9 @@ if uploaded_file:
     pdf.ln(5)
 
     # Table heading: Sauces to Prepare
-    pdf.set_font("Arial","B",12)
-    pdf.cell(0, ch, "Sauces to Prepare", ln=1)
+    pdf.set_font("Arial","B",11)
+    pdf.set_fill_color(230, 230, 230)
+    pdf.cell(0, ch, "Sauces to Prepare", ln=1, fill=True)
     pdf.ln(2)
 
     sauce_prep = [
