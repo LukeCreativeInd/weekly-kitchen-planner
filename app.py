@@ -325,7 +325,7 @@ if uploaded_file:
         ("Butter Chicken", [("Chicken",120),("Sauce",90)], "BUTTER_CHICKEN"),
         ("Broccoli Pasta", [("Chicken",100),("Sauce",100)], "CHICKEN AND BROCCOLI PASTA"),
         ("Thai", [("Chicken",110),("Sauce",90)], "THAI GREEN CHICKEN CURRY"),
-        ("Gnocchi", [("Gnocchi",150),("Chicken",80),("Sauce",200),("Spinach",25)], "CREAMY CHICKEN AND MUSHROOM GNOCCHI")
+        ("Gnocchi", [("Gnocchi",150),("Chicken",80),("Sauce",200),("Spinach",25)], "CREAMY CHICKEN & MUSHROOM GNOCCHI")
     ],"CHICKEN PESTO PASTA"),
         ("Butter Chicken",[("Chicken",120),("Sauce",90)],"BUTTER_CHICKEN"),
         ("Broccoli Pasta",[("Chicken",100),("Sauce",100)],"CHICKEN AND BROCCOLI PASTA"),
