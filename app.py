@@ -112,14 +112,83 @@ if uploaded_file:
             for ingr,per in sub["ingredients"].items():pdf.set_x(x);pdf.cell(col_w*0.3,ch,ingr[:20],1);pdf.cell(col_w*0.15,ch,str(per),1);pdf.cell(col_w*0.15,ch,str(tot),1);pdf.cell(col_w*0.25,ch,str(round(per*tot/batches) if batches else round(per*tot,2)),1);pdf.cell(col_w*0.15,ch,"",1);pdf.ln(ch)
         heights[col]=pdf.get_y()+pad
 
-    # Sauces side by side
-    pdf.add_page();pdf.set_font("Arial","B",14);pdf.cell(0,10,"Sauces",ln=1,align='C');pdf.ln(5)
-    sauces={"Thai Sauce":{"ingredients":[("Green Curry Paste",7),("Coconut Cream",82)],"meal_key":"THAI GREEN CHICKEN CURRY"},"Lamb Sauce":{"ingredients":[("Greek Yogurt",20),("Garlic",2),("Salt",1)],"meal_key":"LAMB SOUVLAKI"}}
-    y0=pdf.get_y();heights=[]
-    for idx,(name,data) in enumerate(sauces.items()):x=xpos[idx];pdf.set_xy(x,y0);pdf.set_font("Arial","B",11);pdf.set_fill_color(230,230,230);pdf.cell(col_w,ch,name,ln=1,fill=True);pdf.set_x(x);pdf.set_font("Arial","B",8);[pdf.cell(col_w*w,ch,h,1) for h,w in [("Ingredient",0.3),("Meal Amount",0.2),("Total Meals",0.2),("Required Ingredient",0.3)]];pdf.ln(ch);pdf.set_font("Arial","",8);tm=meal_totals.get(data["meal_key"],0);[pdf.set_x(x) or pdf.cell(col_w*0.3,ch,ing[:20],1) or pdf.cell(col_w*0.2,ch,str(am),1) or pdf.cell(col_w*0.2,ch,str(tm),1) or pdf.cell(col_w*0.3,ch,str(am*tm),1) or pdf.ln(ch) for ing,am in data["ingredients"]];heights.append(pdf.get_y())
-    pdf.set_xy(left,max(heights)+pad)
+        # Sauces side by side
+    pdf.add_page()
+    pdf.set_font("Arial","B",14)
+    pdf.cell(0,10,"Sauces",ln=1,align='C')
+    pdf.ln(5)
+    sauces={
+        "Thai Sauce": {"ingredients":[("Green Curry Paste",7),("Coconut Cream",82)],"meal_key":"THAI GREEN CHICKEN CURRY"},
+        "Lamb Sauce": {"ingredients":[("Greek Yogurt",20),("Garlic",2),("Salt",1)],"meal_key":"LAMB SOUVLAKI"}
+    }
+    y0 = pdf.get_y()
+    heights = []
+    for idx, (name, data) in enumerate(sauces.items()):
+        x = xpos[idx]
+        pdf.set_xy(x, y0)
+        pdf.set_font("Arial","B",11)
+        pdf.set_fill_color(230,230,230)
+        pdf.cell(col_w, ch, name, ln=1, fill=True)
+        # header row
+        pdf.set_x(x)
+        pdf.set_font("Arial","B",8)
+        pdf.cell(col_w*0.3, ch, "Ingredient", 1)
+        pdf.cell(col_w*0.2, ch, "Meal Amount", 1)
+        pdf.cell(col_w*0.2, ch, "Total Meals", 1)
+        pdf.cell(col_w*0.3, ch, "Required Ingredient", 1)
+        pdf.ln(ch)
+        # data rows
+        pdf.set_font("Arial","",8)
+        tm = meal_totals.get(data["meal_key"], 0)
+        for ing, am in data["ingredients"]:
+            pdf.set_x(x)
+            pdf.cell(col_w*0.3, ch, ing[:20], 1)
+            pdf.cell(col_w*0.2, ch, str(am), 1)
+            pdf.cell(col_w*0.2, ch, str(tm), 1)
+            pdf.cell(col_w*0.3, ch, str(am*tm), 1)
+            pdf.ln(ch)
+        heights.append(pdf.get_y())
+    pdf.set_xy(left, max(heights) + pad)
 
     # To Pack In Fridge
+    pdf.set_font("Arial","B",14)
+    pdf.cell(0,10,"To Pack In Fridge",ln=1,align='C')
+    pdf.ln(5)
+    # Table heading: Sauces to Prepare
+    pdf.set_x(left)
+    pdf.set_font("Arial","B",11)
+    pdf.set_fill_color(230,230,230)
+    pdf.cell(col_w, ch, "Sauces to Prepare", ln=1, fill=True)
+    pdf.ln(2)
+    # Header row
+    pdf.set_x(left)
+    pdf.set_font("Arial","B",8)
+    pdf.cell(col_w*0.4, ch, "Sauce", 1)
+    pdf.cell(col_w*0.2, ch, "Quantity", 1)
+    pdf.cell(col_w*0.2, ch, "Amount", 1)
+    pdf.cell(col_w*0.2, ch, "Total", 1)
+    pdf.ln(ch)
+    # Data rows
+    pdf.set_font("Arial","",8)
+    sauce_prep=[
+        ("MONGOLIAN", 70, "MONGOLIAN BEEF"),
+        ("MEATBALLS", 120, "BEEF MEATBALLS"),
+        ("LEMON", 50, "ROASTED LEMON CHICKEN"),
+        ("MUSHROOM", 100, "STEAK WITH MUSHROOM SAUCE"),
+        ("FAJITA SAUCE", 33, "CHICKEN FAJITA BOWL"),
+        ("BURRITO SAUCE", 43, "BEEF BURRITO BOWL")
+    ]
+    for sauce, qty, meal_key in sauce_prep:
+        pdf.set_x(left)
+        amt = meal_totals.get(meal_key.upper(), 0)
+        total = qty * amt
+        pdf.cell(col_w*0.4, ch, sauce, 1)
+        pdf.cell(col_w*0.2, ch, str(qty), 1)
+        pdf.cell(col_w*0.2, ch, str(amt), 1)
+        pdf.cell(col_w*0.2, ch, str(total), 1)
+        pdf.ln(ch)
+
+    # Chicken Mixing + Mixes
     pdf.set_font("Arial","B",14);pdf.cell(0,10,"To Pack In Fridge",ln=1,align='C');pdf.ln(5)
     pdf.set_x(left);pdf.set_font("Arial","B",11);pdf.set_fill_color(230,230,230);pdf.cell(col_w,ch,"Sauces to Prepare",ln=1,fill=True);pdf.ln(2)
     sauce_prep=[("MONGOLIAN",70,"MONGOLIAN BEEF"),("MEATBALLS",120,"BEEF MEATBALLS"),("LEMON",50,"ROASTED LEMON CHICKEN"),("MUSHROOM",100,"STEAK WITH MUSHROOM SAUCE"),("FAJITA SAUCE",33,"CHICKEN FAJITA BOWL"),("BURRITO SAUCE",43,"BEEF BURRITO BOWL")]
