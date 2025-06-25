@@ -317,13 +317,12 @@ for ingr,qty in pm_rows:
     pdf.cell(col_w*0.4,ch,ingr,1); pdf.cell(col_w*0.3,ch,str(qty),1); pdf.cell(col_w*0.3,ch,str(amt_pm),1)
     pdf.ln(ch)
 fridge_heights[fridge_col] = pdf.get_y() + pad
-# After fridge tables, render Chicken Mixing below
+# After fridge tables, render Chicken Mixing with 2-column flow
 pdf.ln(5)
-pdf.set_x(left)
 pdf.set_font("Arial","B",14)
 pdf.cell(0,10,"Chicken Mixing",ln=1,align='C')
 pdf.ln(5)
-# Mixing Tables (single column)
+# Mixing Tables
 mixes = [
     ("Pesto", [("Chicken",110),("Sauce",80)], "CHICKEN PESTO PASTA", 50),
     ("Butter Chicken", [("Chicken",120),("Sauce",90)], "BUTTER CHICKEN", 50),
@@ -331,36 +330,44 @@ mixes = [
     ("Thai", [("Chicken",110),("Sauce",90)], "THAI GREEN CHICKEN CURRY", 50),
     ("Gnocchi", [("Gnocchi",150),("Chicken",80),("Sauce",200),("Spinach",25)], "CREAMY CHICKEN & MUSHROOM GNOCCHI", 36)
 ]
-for mix_title,data_key,meal_key,divisor in mixes:
-    pdf.set_x(left)
+# initialize mixing columns from fridge bottom
+mix_heights = [fridge_heights[0], fridge_heights[1]]
+mix_col = 0
+for mix_title, data_key, meal_key, divisor in mixes:
+    # estimate block height
+    rows = len(data_key) + 2
+    block_h = (rows + 1) * ch + pad
+    mix_heights, mix_col = next_pos(mix_heights, mix_col, block_h)
+    x, y = xpos[mix_col], mix_heights[mix_col]
+    pdf.set_xy(x, y)
+    # header
     pdf.set_font("Arial","B",11)
     pdf.set_fill_color(230,230,230)
     pdf.cell(col_w, ch, mix_title, ln=1, fill=True)
-    pdf.ln(2)
-    pdf.set_x(left)
+    pdf.set_x(x)
     pdf.set_font("Arial","B",8)
-    pdf.cell(col_w*0.3, ch, "Ingredient", 1)
-    pdf.cell(col_w*0.2, ch, "Quantity", 1)
-    pdf.cell(col_w*0.2, ch, "Amount", 1)
-    pdf.cell(col_w*0.2, ch, "Total", 1)
-    pdf.cell(col_w*0.1, ch, "Batches", 1)
+    for header, w in [("Ingredient",0.3),("Quantity",0.2),("Amount",0.2),("Total",0.2),("Batches",0.1)]:
+        pdf.cell(col_w * w, ch, header, 1)
     pdf.ln(ch)
+    # rows
     pdf.set_font("Arial","",8)
     amt = meal_totals.get(meal_key.upper(), 0)
-    raw_batches = math.ceil(amt/divisor) if amt > 0 else 0
-    batches = raw_batches + (raw_batches % 2)
+    rb = math.ceil(amt/divisor) if amt>0 else 0
+    batches = rb + (rb % 2)
     for ingr, qty in data_key:
         total = (qty * amt) / batches if batches else 0
-        pdf.set_x(left)
-        pdf.cell(col_w*0.3, ch, ingr, 1)
+        pdf.set_x(x)
+        pdf.cell(col_w*0.3, ch, ingr[:20], 1)
         pdf.cell(col_w*0.2, ch, str(qty), 1)
         pdf.cell(col_w*0.2, ch, str(amt), 1)
         pdf.cell(col_w*0.2, ch, str(round(total,2)), 1)
         pdf.cell(col_w*0.1, ch, str(batches), 1)
         pdf.ln(ch)
+    mix_heights[mix_col] = pdf.get_y() + pad
 
 # ------------------
 # Save & Download
+# ------------------
 # ------------------ & Download
 # ------------------
 # ------------------
