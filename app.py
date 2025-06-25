@@ -280,6 +280,45 @@ if uploaded_file:
         pdf.cell(col_w*0.2, ch, str(total), 1)
         pdf.ln(ch)
 
+        # ------------------
+    # Page5: Chicken Mixing
+    # ------------------
+    pdf.add_page()
+    pdf.set_font("Arial","B",14)
+    pdf.cell(0,10,"Chicken Mixing",ln=1,align='C')
+    pdf.ln(5)
+
+    # Table heading: Pesto
+    pdf.set_x(left)
+    pdf.set_font("Arial","B",11)
+    pdf.set_fill_color(230, 230, 230)
+    pdf.cell(col_w, ch, "Pesto", ln=1, fill=True)
+    pdf.ln(2)
+
+    # Table headers
+    pdf.set_x(left)
+    pdf.set_font("Arial","B",8)
+    pdf.cell(col_w*0.3, ch, "Ingredient", 1)
+    pdf.cell(col_w*0.2, ch, "Quantity", 1)
+    pdf.cell(col_w*0.2, ch, "Amount", 1)
+    pdf.cell(col_w*0.2, ch, "Total", 1)
+    pdf.cell(col_w*0.1, ch, "Batches", 1)
+    pdf.ln(ch)
+
+    # Data rows
+    pdf.set_font("Arial","",8)
+    amount = meal_totals.get("CHICKEN PESTO PASTA", 0)
+    batches = math.ceil(amount / 50) if amount > 0 else 0
+    for ingredient, qty in [("Chicken", 110), ("Sauce", 80)]:
+        total = (qty * amount) / batches if batches > 0 else 0
+        pdf.set_x(left)
+        pdf.cell(col_w*0.3, ch, ingredient, 1)
+        pdf.cell(col_w*0.2, ch, str(qty), 1)
+        pdf.cell(col_w*0.2, ch, str(amount), 1)
+        pdf.cell(col_w*0.2, ch, str(round(total, 2)), 1)
+        pdf.cell(col_w*0.1, ch, str(batches), 1)
+        pdf.ln(ch)
+
     # Save & download
     fname = f"daily_production_report_{datetime.today().strftime('%d-%m-%Y')}.pdf"
     pdf.output(fname)
