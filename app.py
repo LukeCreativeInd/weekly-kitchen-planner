@@ -217,12 +217,19 @@ if uploaded_file:
         pdf.set_x(left); pdf.set_font("Arial","B",8)
         for h,w in [("Ingredient",0.3),("Quantity",0.2),("Amount",0.2),("Total",0.2),("Batches",0.1)]: pdf.cell(col_w*w,ch,h,1)
         pdf.ln(ch); pdf.set_font("Arial","",8)
-        amt = meal_totals.get(meal_key.upper(), 0)
-raw_batches = math.ceil(amt/50) if amt > 0 else 0
-# round up to nearest even number
-batches = raw_batches + (raw_batches % 2)
-
-        for ingr,qty in ingredients: pdf.set_x(left); total=(qty*amt)/batches if batches else 0; pdf.cell(col_w*0.3,ch,ingr,1); pdf.cell(col_w*0.2,ch,str(qty),1); pdf.cell(col_w*0.2,ch,str(amt),1); pdf.cell(col_w*0.2,ch,str(round(total,2)),1); pdf.cell(col_w*0.1,ch,str(batches),1); pdf.ln(ch)
+                    amt = meal_totals.get(meal_key.upper(), 0)
+            raw_batches = math.ceil(amt/50) if amt > 0 else 0
+            # round up to nearest even number
+            batches = raw_batches + (raw_batches % 2)
+            for ingr, qty in ingredients:
+                total = (qty * amt) / batches if batches else 0
+                pdf.set_x(left)
+                pdf.cell(col_w*0.3, ch, ingr, 1)
+                pdf.cell(col_w*0.2, ch, str(qty), 1)
+                pdf.cell(col_w*0.2, ch, str(amt), 1)
+                pdf.cell(col_w*0.2, ch, str(round(total, 2)), 1)
+                pdf.cell(col_w*0.1, ch, str(batches), 1)
+                pdf.ln(ch)
 
     # ------------------
     # Save & Download
