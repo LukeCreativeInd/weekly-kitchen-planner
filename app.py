@@ -418,6 +418,15 @@ for sauce in sauce_sections:
     draw_sauce_section(sauce_current_column, sauce["title"], sauce["ingredients"], meal_totals.get(sauce["meal"], 0))
     sauce_current_column = 1 - sauce_current_column
 
+# Save PDF using relative path for compatibility
+pdf_path = f"daily_production_report_{filename_date}.pdf"
 pdf.output(pdf_path)
-    with open(pdf_path, "rb") as f:
-        st.download_button("\U0001F4C4 Download Bulk Order PDF", f, file_name=pdf_path, mime="application/pdf")
+
+# Make the download button available after writing the file
+with open(pdf_path, "rb") as f:
+    st.download_button(
+        "\U0001F4C4 Download Bulk Order PDF",
+        f,
+        file_name=pdf_path,
+        mime="application/pdf"
+    )
