@@ -58,6 +58,10 @@ if uploaded_file:
     pdf.set_font("Arial","B",14)
     pdf.cell(0,10,f"Daily Prod Report - {datetime.today().strftime('%d/%m/%Y')}",ln=1,align='C')
     pdf.ln(5)
+    # Subsection Title
+    pdf.set_font("Arial","B",12)
+    pdf.cell(0, ch, "Sauces to Prepare", ln=1)
+    pdf.ln(2)
     heights=[pdf.get_y(),pdf.get_y()]
     col=0
     def draw_bulk(idx,sec):
