@@ -24,7 +24,7 @@ bulk_sections = [
 ]
 
 # ----------------------------
-# ST App
+# Streamlit App
 # ----------------------------
 st.title("📦 Bulk Ingredient Summary Report")
 uploaded_file = st.file_uploader("Upload Production File (CSV or Excel)", type=["csv", "xlsx"])
@@ -62,31 +62,52 @@ if uploaded_file:
     col=0
     def draw_bulk(idx,sec):
         x,y = xpos[idx],heights[idx]
-        pdf.set_xy(x,y);pdf.set_font("Arial","B",11);pdf.set_fill_color(230,230,230)
+        pdf.set_xy(x,y)
+        pdf.set_font("Arial","B",11)
+        pdf.set_fill_color(230,230,230)
         pdf.cell(col_w,ch,sec['title'],ln=1,fill=True)
-        pdf.set_x(x);pdf.set_font("Arial","B",8)
-        for h,w in [("Ingredient",0.4),("Qty/Meal",0.15),("Meals",0.15),("Total",0.15),("Batches",0.15)]:pdf.cell(col_w*w,ch,h,1)
-        pdf.ln(ch);pdf.set_font("Arial","",8)
+        pdf.set_x(x)
+        pdf.set_font("Arial","B",8)
+        for h,w in [("Ingredient",0.4),("Qty/Meal",0.15),("Meals",0.15),("Total",0.15),("Batches",0.15)]:
+            pdf.cell(col_w*w,ch,h,1)
+        pdf.ln(ch)
+        pdf.set_font("Arial","",8)
         totm=sum(meal_totals.get(m.upper(),0) for m in sec['meals'])
         batches=math.ceil(totm/sec['batch_size']) if sec['batch_size']>0 else 0
         for ingr,per in sec['ingredients'].items():
-            total_qty=per*totm;adj=(round(total_qty/batches) if batches else round(total_qty,2));lbl=batches if ingr==sec['batch_ingredient'] else ""
-            pdf.set_x(x);pdf.cell(col_w*0.4,ch,ingr[:20],1);pdf.cell(col_w*0.15,ch,str(per),1)
-            pdf.cell(col_w*0.15,ch,str(totm),1);pdf.cell(col_w*0.15,ch,str(adj),1);pdf.cell(col_w*0.15,ch,str(lbl),1);pdf.ln(ch)
+            total_qty=per*totm
+            adj=round(total_qty/batches) if batches else round(total_qty,2)
+            lbl=batches if ingr==sec['batch_ingredient'] else ""
+            pdf.set_x(x)
+            pdf.cell(col_w*0.4,ch,ingr[:20],1)
+            pdf.cell(col_w*0.15,ch,str(per),1)
+            pdf.cell(col_w*0.15,ch,str(totm),1)
+            pdf.cell(col_w*0.15,ch,str(adj),1)
+            pdf.cell(col_w*0.15,ch,str(lbl),1)
+            pdf.ln(ch)
         heights[idx]=pdf.get_y()+pad
     for sec in bulk_sections:
         block_h=(len(sec['ingredients'])+2)*ch+pad
         if heights[col]+block_h>bottom:
-            if col==0:col=1
+            if col==0:
+                col=1
             else:
-                pdf.add_page();pdf.set_font("Arial","B",14);pdf.cell(0,10,"Daily Prod Report - Continued",ln=1,align='C');pdf.ln(5)
-                y0=pdf.get_y();heights=[y0,y0];col=0
+                pdf.add_page()
+                pdf.set_font("Arial","B",14)
+                pdf.cell(0,10,"Daily Prod Report - Continued",ln=1,align='C')
+                pdf.ln(5)
+                y0=pdf.get_y()
+                heights=[y0,y0]
+                col=0
         draw_bulk(col,sec)
 
     # ------------------
     # Page2: Recipes
     # ------------------
-    pdf.add_page();pdf.set_font("Arial","B",14);pdf.cell(0,10,"Meal Recipes",ln=1,align='C');pdf.ln(5)
+    pdf.add_page()
+    pdf.set_font("Arial","B",14)
+    pdf.cell(0,10,"Meal Recipes",ln=1,align='C')
+    pdf.ln(5)
     meal_recipes={
         "Spaghetti Bolognese":{"batch":90,"ingredients":{"Beef Mince":100,"Napoli Sauce":65,"Crushed Tomatoes":45,"Beef Stock":30,"Onion":15,"Zucchini":15,"Carrot":15,"Vegetable Oil":1,"Salt":2,"Pepper":0.5,"Spaghetti":68}},
         "Beef Chow Mein":{"batch":80,"ingredients":{"Beef Mince":120,"Celery":42,"Carrot":42,"Cabbage":42,"Onion":42,"Oil":2,"Pepper":0.8,"Soy Sauce":13,"Oyster Sauce":13,"Rice":130}},
@@ -107,52 +128,107 @@ if uploaded_file:
     heights=[pdf.get_y(),pdf.get_y()];col=0
     def draw_meal(idx,name,data):
         x,y=xpos[idx],heights[idx]
-        pdf.set_xy(x,y);pdf.set_font("Arial","B",11);pdf.set_fill_color(230,230,230)
+        pdf.set_xy(x,y)
+        pdf.set_font("Arial","B",11)
+        pdf.set_fill_color(230,230,230)
         pdf.cell(col_w,ch,name,ln=1,fill=True)
-        pdf.set_x(x);pdf.set_font("Arial","B",8)
-        for h,w in [("Ingredient",0.3),("Qty/Meal",0.15),("Meals",0.15),("Batch Total",0.25),("Batch",0.15)]:pdf.cell(col_w*w,ch,h,1)
-        pdf.ln(ch);pdf.set_font("Arial","",8)
-        tot=meal_totals.get(name.upper(),0);batches=math.ceil(tot/data.get("batch",1)) if data.get("batch",0)>0 else 0
-        for i,(ing,qty) in enumerate(data["ingredients"].items()):bt=(round(qty*tot/batches) if batches else 0);bl=str(batches) if i==0 else ""
-            pdf.set_x(x);pdf.cell(col_w*0.3,ch,ing[:20],1);pdf.cell(col_w*0.15,ch,str(qty),1);pdf.cell(col_w*0.15,ch,str(tot),1);pdf.cell(col_w*0.25,ch,str(bt),1);pdf.cell(col_w*0.15,ch,bl,1);pdf.ln(ch)
+        pdf.set_x(x)
+        pdf.set_font("Arial","B",8)
+        for h,w in [("Ingredient",0.3),("Qty/Meal",0.15),("Meals",0.15),("Batch Total",0.25),("Batch",0.15)]:
+            pdf.cell(col_w*w,ch,h,1)
+        pdf.ln(ch)
+        pdf.set_font("Arial","",8)
+        tot=meal_totals.get(name.upper(),0)
+        batches=math.ceil(tot/data.get("batch",1)) if data.get("batch",0)>0 else 0
+        # main ingredients
+        for i,(ing,qty) in enumerate(data["ingredients"].items()):
+            bt = round(qty * tot / batches) if batches else 0
+            bl = str(batches) if i==0 else ""
+            pdf.set_x(x)
+            pdf.cell(col_w*0.3,ch,ing[:20],1)
+            pdf.cell(col_w*0.15,ch,str(qty),1)
+            pdf.cell(col_w*0.15,ch,str(tot),1)
+            pdf.cell(col_w*0.25,ch,str(bt),1)
+            pdf.cell(col_w*0.15,ch,bl,1)
+            pdf.ln(ch)
+        # sub-section
         if "sub_section" in data:
-            sub=data["sub_section"]
-            pdf.set_x(x);pdf.set_font("Arial","B",9);pdf.cell(col_w,ch,sub["title"],ln=1)
-            pdf.set_x(x);pdf.set_font("Arial","B",8)
-            for h,w in [("Ingredient",0.3),("Qty/Meal",0.15),("Meals",0.15),("Total",0.25),("",0.15)]:pdf.cell(col_w*w,ch,h,1)
-            pdf.ln(ch);pdf.set_font("Arial","",8)
-            for ingr,per in sub["ingredients"].items():adj=(round(per*tot/batches) if batches else round(per*tot,2))
-                pdf.set_x(x);pdf.cell(col_w*0.3,ch,ingr[:20],1);pdf.cell(col_w*0.15,ch,str(per),1);pdf.cell(col_w*0.15,ch,str(tot),1);pdf.cell(col_w*0.25,ch,str(adj),1);pdf.cell(col_w*0.15,ch,"");pdf.ln(ch)
+            sub = data["sub_section"]
+            pdf.set_x(x)
+            pdf.set_font("Arial","B",9)
+            pdf.cell(col_w,ch,sub["title"],ln=1)
+            pdf.set_x(x)
+            pdf.set_font("Arial","B",8)
+            for h,w in [("Ingredient",0.3),("Qty/Meal",0.15),("Meals",0.15),("Total",0.25),("",0.15)]:
+                pdf.cell(col_w*w,ch,h,1)
+            pdf.ln(ch)
+            pdf.set_font("Arial","",8)
+            for ingr,per in sub["ingredients"].items():
+                adj = round(per * tot / batches) if batches else round(per * tot,2)
+                pdf.set_x(x)
+                pdf.cell(col_w*0.3,ch,ingr[:20],1)
+                pdf.cell(col_w*0.15,ch,str(per),1)
+                pdf.cell(col_w*0.15,ch,str(tot),1)
+                pdf.cell(col_w*0.25,ch,str(adj),1)
+                pdf.cell(col_w*0.15,ch,"")
+                pdf.ln(ch)
         heights[idx]=pdf.get_y()+pad
     for name,data in meal_recipes.items():
-        main=len(data["ingredients"]);sub=len(data.get("sub_section",{}).get("ingredients",{}))
-        block_h=(1+1+main+(2+sub if sub else 0))*ch+pad
-        if heights[col]+block_h>bottom:
-            if col==0:col=1
-            else:pdf.add_page();pdf.set_font("Arial","B",14);pdf.cell(0,10,"Meal Recipes - Continued",ln=1,align='C');pdf.ln(5);y0=pdf.get_y();heights=[y0,y0];col=0
+        main=len(data["ingredients"])
+        sub=len(data.get("sub_section",{}).get("ingredients",{}))
+        rows = 1 + 1 + main + (2 + sub if sub else 0)
+        block_h = rows * ch + pad
+        if heights[col] + block_h > bottom:
+            if col==0:
+                col=1
+            else:
+                pdf.add_page()
+                pdf.set_font("Arial","B",14)
+                pdf.cell(0,10,"Meal Recipes - Continued",ln=1,align='C')
+                pdf.ln(5)
+                y0=pdf.get_y();heights=[y0,y0];col=0
         draw_meal(col,name,data)
 
     # ------------------
     # Page3: Sauces
     # ------------------
-    pdf.add_page();pdf.set_font("Arial","B",14);pdf.cell(0,10,"Sauces",ln=1,align='C');pdf.ln(5)
+    pdf.add_page()
+    pdf.set_font("Arial","B",14)
+    pdf.cell(0,10,"Sauces",ln=1,align='C')
+    pdf.ln(5)
     sauces={"Thai Sauce":{"ingredients":[("Green Curry Paste",7),("Coconut Cream",82)],"meal_key":"THAI GREEN CHICKEN CURRY"},"Lamb Sauce":{"ingredients":[("Greek Yogurt",20),("Garlic",2),("Salt",1)],"meal_key":"LAMB SOUVLAKI"}}
     heights=[pdf.get_y(),pdf.get_y()];col=0
     def draw_sauce(idx,name,data):
         x,y=xpos[idx],heights[idx]
-        pdf.set_xy(x,y);pdf.set_font("Arial","B",11);pdf.set_fill_color(230,230,230)
+        pdf.set_xy(x,y)
+        pdf.set_font("Arial","B",11)
+        pdf.set_fill_color(230,230,230)
         pdf.cell(col_w,ch,name,ln=1,fill=True)
-        pdf.set_x(x);pdf.set_font("Arial","B",8)
-        for h,w in [("Ingredient",0.3),("Meal Amount",0.2),("Total Meals",0.2),("Required Ingredient",0.3)]:pdf.cell(col_w*w,ch,h,1)
-        pdf.ln(ch);pdf.set_font("Arial","",8)
+        pdf.set_x(x)
+        pdf.set_font("Arial","B",8)
+        for h,w in [("Ingredient",0.3),("Meal Amount",0.2),("Total Meals",0.2),("Required Ingredient",0.3)]:
+            pdf.cell(col_w*w,ch,h,1)
+        pdf.ln(ch)
+        pdf.set_font("Arial","",8)
         tm=meal_totals.get(data["meal_key"],0)
-        for ing,am in data["ingredients"]:pdf.set_x(x);pdf.cell(col_w*0.3,ch,ing[:20],1);pdf.cell(col_w*0.2,ch,str(am),1);pdf.cell(col_w*0.2,ch,str(tm),1);pdf.cell(col_w*0.3,ch,str(am*tm),1);pdf.ln(ch)
+        for ing,am in data["ingredients"]:
+            pdf.set_x(x)
+            pdf.cell(col_w*0.3,ch,ing[:20],1)
+            pdf.cell(col_w*0.2,ch,str(am),1)
+            pdf.cell(col_w*0.2,ch,str(tm),1)
+            pdf.cell(col_w*0.3,ch,str(am*tm),1)
+            pdf.ln(ch)
         heights[idx]=pdf.get_y()+pad
     for name,data in sauces.items():
         block_h=(1+1+len(data["ingredients"]))*ch+pad
         if heights[col]+block_h>bottom:
             if col==0:col=1
-            else:pdf.add_page();pdf.set_font("Arial","B",14);pdf.cell(0,10,"Sauces - Continued",ln=1,align='C');pdf.ln(5);y0=pdf.get_y();heights=[y0,y0];col=0
+            else:
+                pdf.add_page()
+                pdf.set_font("Arial","B",14)
+                pdf.cell(0,10,"Sauces - Continued",ln=1,align='C')
+                pdf.ln(5)
+                y0=pdf.get_y();heights=[y0,y0];col=0
         draw_sauce(col,name,data)
 
     # Save & download
