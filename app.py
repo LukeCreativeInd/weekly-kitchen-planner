@@ -188,18 +188,49 @@ if uploaded_file:
         pdf.cell(col_w*0.2, ch, str(total), 1)
         pdf.ln(ch)
 
-    # Chicken Mixing + Mixes
-    pdf.set_font("Arial","B",14);pdf.cell(0,10,"To Pack In Fridge",ln=1,align='C');pdf.ln(5)
-    pdf.set_x(left);pdf.set_font("Arial","B",11);pdf.set_fill_color(230,230,230);pdf.cell(col_w,ch,"Sauces to Prepare",ln=1,fill=True);pdf.ln(2)
-    sauce_prep=[("MONGOLIAN",70,"MONGOLIAN BEEF"),("MEATBALLS",120,"BEEF MEATBALLS"),("LEMON",50,"ROASTED LEMON CHICKEN"),("MUSHROOM",100,"STEAK WITH MUSHROOM SAUCE"),("FAJITA SAUCE",33,"CHICKEN FAJITA BOWL"),("BURRITO SAUCE",43,"BEEF BURRITO BOWL")]
-    pdf.set_font("Arial","B",8);[pdf.cell(col_w*0.4,ch,h,1) for h in ["Sauce","Quantity","Amount","Total"]];pdf.ln(ch);pdf.set_font("Arial","",8);[pdf.set_x(left) or pdf.cell(col_w*0.4,ch,s,1) or pdf.cell(col_w*0.2,ch,str(q),1) or pdf.cell(col_w*0.2,ch,str(meal_totals.get(m.upper(),0)),1) or pdf.cell(col_w*0.2,ch,str(q*meal_totals.get(m.upper(),0)),1) or pdf.ln(ch) for s,q,m in sauce_prep]
+        # Chicken Mixing + Mixes
+    pdf.ln(5)
+    pdf.set_font("Arial","B",14)
+    pdf.cell(0,10,"Chicken Mixing",ln=1,align='C')
+    pdf.ln(5)
+    mixes=[
+        ("Pesto", [("Chicken",110),("Sauce",80)],"CHICKEN PESTO PASTA",50),
+        ("Butter Chicken", [("Chicken",120),("Sauce",90)],"BUTTER CHICKEN",50),
+        ("Broccoli Pasta", [("Chicken",100),("Sauce",100)],"CHICKEN AND BROCCOLI PASTA",50),
+        ("Thai", [("Chicken",110),("Sauce",90)],"THAI GREEN CHICKEN CURRY",50),
+        ("Gnocchi", [("Gnocchi",150),("Chicken",80),("Sauce",200),("Spinach",25)],"CREAMY CHICKEN & MUSHROOM GNOCCHI",36)
+    ]
+    for mix_title, ingredients, meal_key, divisor in mixes:
+        pdf.set_x(left)
+        pdf.set_font("Arial","B",11)
+        pdf.set_fill_color(230,230,230)
+        pdf.cell(col_w, ch, mix_title, ln=1, fill=True)
+        pdf.ln(2)
+        pdf.set_x(left)
+        pdf.set_font("Arial","B",8)
+        # column headers
+        pdf.cell(col_w*0.3, ch, "Ingredient", 1)
+        pdf.cell(col_w*0.2, ch, "Quantity", 1)
+        pdf.cell(col_w*0.2, ch, "Amount", 1)
+        pdf.cell(col_w*0.2, ch, "Total", 1)
+        pdf.cell(col_w*0.1, ch, "Batches", 1)
+        pdf.ln(ch)
+        pdf.set_font("Arial","",8)
+        amt = meal_totals.get(meal_key.upper(), 0)
+        raw_batches = math.ceil(amt/divisor) if amt > 0 else 0
+        batches = raw_batches + (raw_batches % 2)
+        for ingr, qty in ingredients:
+            total = (qty * amt) / batches if batches else 0
+            pdf.set_x(left)
+            pdf.cell(col_w*0.3, ch, ingr, 1)
+            pdf.cell(col_w*0.2, ch, str(qty), 1)
+            pdf.cell(col_w*0.2, ch, str(amt), 1)
+            pdf.cell(col_w*0.2, ch, str(round(total,2)), 1)
+            pdf.cell(col_w*0.1, ch, str(batches), 1)
+            pdf.ln(ch)
 
-    # Chicken Mixing + Mixes
-    pdf.ln(5);pdf.set_font("Arial","B",14);pdf.cell(0,10,"Chicken Mixing",ln=1,align='C');pdf.ln(5)
-    mixes=[("Pesto",[("Chicken",110),("Sauce",80)],"CHICKEN PESTO PASTA",50),("Butter Chicken",[("Chicken",120),("Sauce",90)],"BUTTER CHICKEN",50),("Broccoli Pasta",[("Chicken",100),("Sauce",100)],"CHICKEN AND BROCCOLI PASTA",50),("Thai",[("Chicken",110),("Sauce",90)],"THAI GREEN CHICKEN CURRY",50),("Gnocchi",[("Gnocchi",150),("Chicken",80),("Sauce",200),("Spinach",25)],"CREAMY CHICKEN & MUSHROOM GNOCCHI",36)]
-    for mix_title,ingredients,meal_key,div in mixes:
-        pdf.set_x(left);pdf.set_font("Arial","B",11);pdf.set_fill_color(230,230,230);pdf.cell(col_w,ch,mix_title,ln=1,fill=True);pdf.ln(2);pdf.set_x(left);pdf.set_font("Arial","B",8);[pdf.cell(col_w*w,ch,h,1) for h,w in [("Ingredient",0.3),("Quantity",0.2),("Amount",0.2),("Total",0.2),("Batches",0.1)]];pdf.ln(ch);pdf.set_font("Arial","",8);amt=meal_totals.get(meal_key.upper(),0);rb=math.ceil(amt/div) if amt>0 else 0;batch=rb+(rb%2);[pdf.set_x(left) or pdf.cell(col_w*0.3,ch,i,1) or pdf.cell(col_w*0.2,ch,str(q),1) or pdf.cell(col_w*0.2,ch,str(amt),1) or pdf.cell(col_w*0.2,ch,str(round(q*amt/batch,2)),1) or pdf.cell(col_w*0.1,ch,str(batch),1) or pdf.ln(ch) for i,q in ingredients]
-
-    # Save
+    # ------------------
+    # Save & Download
+    # ------------------
     fname=f"daily_production_report_{datetime.today().strftime('%d-%m-%Y')}.pdf";pdf.output(fname)
     with open(fname,"rb") as f: st.download_button(label="📄 Download Bulk Order PDF",data=f,file_name=fname,mime="application/pdf")
