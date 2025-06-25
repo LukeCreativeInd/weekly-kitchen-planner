@@ -30,6 +30,7 @@ st.title("📦 Bulk Ingredient Summary Report")
 uploaded_file = st.file_uploader("Upload Production File (CSV or Excel)", type=["csv", "xlsx"])
 
 if uploaded_file:
+    # Read data
     if uploaded_file.name.endswith(".csv"):
         df = pd.read_csv(uploaded_file)
     else:
@@ -42,11 +43,17 @@ if uploaded_file:
 
     st.success("File uploaded successfully!")
     st.dataframe(df)
-
     meal_totals = dict(zip(df["product name"].str.upper(), df["quantity"]))
 
+    # Layout constants
     pdf = FPDF()
     pdf.set_auto_page_break(auto=True, margin=10)
+    left_margin = 10
+    page_width = 210 - 2 * left_margin
+    col_width = page_width / 2 - 5
+    cell_height = 6
+    padding_after_table = 4
+    column_x = [left_margin, left_margin + col_width + 10]
 
     # ----------------------------
     # Page 1: Bulk Summary
@@ -57,60 +64,47 @@ if uploaded_file:
     pdf.cell(0, 10, f"Daily Production Report - {report_date}", ln=True, align="C")
     pdf.ln(5)
 
-    left_margin = 10
-    page_width = 210 - 2 * left_margin
-    col_width = page_width / 2 - 5
-    cell_height = 6
-    padding_after_table = 4
-
     column_heights = [pdf.get_y(), pdf.get_y()]
-    column_x = [left_margin, left_margin + col_width + 10]
     current_column = 0
 
     def draw_section(column_index, section):
         x = column_x[column_index]
         y = column_heights[column_index]
         pdf.set_xy(x, y)
-
         pdf.set_font("Arial", "B", 11)
         pdf.set_fill_color(230, 230, 230)
         pdf.cell(col_width, cell_height, section["title"], ln=1, fill=True)
 
         pdf.set_x(x)
         pdf.set_font("Arial", "B", 8)
-        pdf.cell(col_width * 0.4, cell_height, "Ingredient", 1)
-        pdf.cell(col_width * 0.15, cell_height, "Qty/Meal", 1)
-        pdf.cell(col_width * 0.15, cell_height, "Meals", 1)
-        pdf.cell(col_width * 0.15, cell_height, "Total", 1)
-        pdf.cell(col_width * 0.15, cell_height, "Batches", 1)
+        pdf.cell(col_width*0.4, cell_height, "Ingredient", 1)
+        pdf.cell(col_width*0.15, cell_height, "Qty/Meal", 1)
+        pdf.cell(col_width*0.15, cell_height, "Meals", 1)
+        pdf.cell(col_width*0.15, cell_height, "Total", 1)
+        pdf.cell(col_width*0.15, cell_height, "Batches", 1)
         pdf.ln(cell_height)
 
         pdf.set_font("Arial", "", 8)
-        amount = sum(meal_totals.get(meal.upper(), 0) for meal in section["meals"]) 
-        batches_required = math.ceil(amount / section["batch_size"]) if section["batch_size"] > 0 else 0
+        amount = sum(meal_totals.get(m.upper(), 0) for m in section["meals"])
+        batches_required = math.ceil(amount / section["batch_size"]) if section["batch_size"]>0 else 0
 
         for ing, per in section["ingredients"].items():
-            total_qty = per * amount
-            if section["batch_size"] > 0 and batches_required > 0:
-                adjusted = round(total_qty / batches_required)
-            else:
-                adjusted = round(total_qty, 2)
-            batch_label = batches_required if ing == section["batch_ingredient"] else ""
-
+            total_qty = per*amount
+            adjusted = round(total_qty/batches_required) if batches_required>0 and section["batch_size"]>0 else round(total_qty,2)
+            batch_label = batches_required if ing==section["batch_ingredient"] else ""
             pdf.set_x(x)
-            pdf.cell(col_width * 0.4, cell_height, ing[:20], 1)
-            pdf.cell(col_width * 0.15, cell_height, str(per), 1)
-            pdf.cell(col_width * 0.15, cell_height, str(amount), 1)
-            pdf.cell(col_width * 0.15, cell_height, str(adjusted), 1)
-            pdf.cell(col_width * 0.15, cell_height, str(batch_label), 1)
+            pdf.cell(col_width*0.4, cell_height, ing[:20],1)
+            pdf.cell(col_width*0.15, cell_height, str(per),1)
+            pdf.cell(col_width*0.15, cell_height, str(amount),1)
+            pdf.cell(col_width*0.15, cell_height, str(adjusted),1)
+            pdf.cell(col_width*0.15, cell_height, str(batch_label),1)
             pdf.ln(cell_height)
 
-        column_heights[column_index] = pdf.get_y() + padding_after_table
+        column_heights[column_index] = pdf.get_y()+padding_after_table
 
     for sec in bulk_sections:
-        est = column_heights[current_column] + (len(sec["ingredients"]) + 2) * cell_height + padding_after_table
-        if est > 270:
-            current_column = 1 - current_column
+        est = column_heights[current_column] + (len(sec["ingredients"])+2)*cell_height + padding_after_table
+        if est>270: current_column = 1-current_column
         draw_section(current_column, sec)
 
     # ----------------------------
@@ -122,253 +116,100 @@ if uploaded_file:
     pdf.ln(5)
 
     meal_recipes = {
-        "Spaghetti Bolognese": {
-            "batch": 90,
-            "ingredients": {
-                "Beef Mince": 100,
-                "Napoli Sauce": 65,
-                "Crushed Tomatoes": 45,
-                "Beef Stock": 30,
-                "Onion": 15,
-                "Zucchini": 15,
-                "Carrot": 15,
-                "Vegetable Oil": 1,
-                "Salt": 2,
-                "Pepper": 0.5,
-                "Spaghetti": 68
-            }
-        },
-        "Beef Chow Mein": {
-            "batch": 80,
-            "ingredients": {
-                "Beef Mince": 120,
-                "Celery": 42,
-                "Carrot": 42,
-                "Cabbage": 42,
-                "Onion": 42,
-                "Oil": 2,
-                "Pepper": 0.8,
-                "Soy Sauce": 13,
-                "Oyster Sauce": 13,
-                "Rice": 130
-            }
-        },
-        "Shepherd's Pie": {
-            "batch": 82,
-            "ingredients": {
-                "Beef Mince": 100,
-                "Oil": 2,
-                "Carrots": 15,
-                "Capsicum": 15,
-                "Onion": 15,
-                "Mushroom": 15,
-                "Peas": 15,
-                "Tomato Paste": 6,
-                "Beef Stock": 20,
-                "Salt": 2,
-                "Pepper": 0.5,
-                "Napoli Sauce": 70
-            }
-        },
-        "Beef Burrito Bowl": {
-            "batch": 130,
-            "ingredients": {
-                "Beef Mince": 95,
-                "Onion": 12,
-                "Capsicum": 12,
-                "Vegetable Oil": 2,
-                "Taco Seasoning": 7,
-                "Salt": 1.5,
-                "Pepper": 0.5,
-                "Beef Stock": 40
-            }
-        },
-        "Beef Meatballs": {
-            "batch": 0,
-            "ingredients": {
-                "Mince": 150,
-                "Onion": 10,
-                "Parsley": 3,
-                "Salt": 1.5,
-                "Pepper": 0.2
-            }
-        },
-        "Lebanese Beef Stew": {
-            "batch": 80,
-            "ingredients": {
-                "Chuck Diced": 97,
-                "Onion": 30,
-                "Carrot": 30,
-                "Potato": 30,
-                "Peas": 30,
-                "Oil": 2,
-                "Salt": 2.5,
-                "Pepper": 0.5,
-                "Tomato Paste": 20,
-                "Water": 30,
-                "Beef Stock": 30,
-                "Rice": 130
-            }
-        },
-        "Mongolian Beef": {
-            "batch": 0,
-            "ingredients": {
-                "Chuck": 97,
-                "Baking Soda": 2.5,
-                "Water": 10,
-                "Soy Sauce": 5,
-                "Cornflour": 2.5
-            }
-        },
-        "Chicken With Vegetables": {
-            "batch": 0,
-            "ingredients": {
-                "Chicken": 135,
-                "Corn": 52,
-                "Beans": 60,
-                "Broccoli": 67
-            }
-        },
-        "Chicken Sweet Potato and Beans": {
-            "batch": 0,
-            "ingredients": {
-                "Chicken": 135,
-                "Beans": 60
-            }
-        },
-        "Naked Chicken Parma": {
-            "batch": 0,
-            "ingredients": {
-                "Chicken": 150
-            }
-        },
-        "Chicken Pesto Pasta": {
-            "batch": 0,
-            "ingredients": {
-                "Chicken": 130,
-                "Penne": 59,
-                "Sundried Tomatoes": 24
-            }
-        },
-        "Chicken and Broccoli Pasta": {
-            "batch": 0,
-            "ingredients": {
-                "Chicken": 130,
-                "Penne": 59,
-                "Broccoli": 40
-            }
-        },
-        "Butter Chicken": {
-            "batch": 0,
-            "ingredients": {
-                "Chicken": 140,
-                "Peas": 40,
-                "Rice": 130
-            }
-        },
-        "Thai Green Chicken Curry": {
-            "batch": 0,
-            "ingredients": {
-                "Chicken": 140,
-                "Rice": 130
-            }
-        },
-        "Moroccan Chicken": {
-            "batch": 0,
-            "ingredients": {
-                "Chicken": 180
-            },
-            "sub_section": {
-                "title": "Chickpea Recipe",
-                "ingredients": {
-                    "Onion": 20,
-                    "Zucchini": 30,
-                    "Red Capsicum": 30,
-                    "Garlic": 2,
-                    "Oil": 2,
-                    "Chickpeas": 115,
-                    "Mix Spices": 1.7,
-                    "Chicken Stock": 50
-                }
-            }
-        }
+        "Spaghetti Bolognese": {"batch":90, "ingredients": {"Beef Mince":100,"Napoli Sauce":65,"Crushed Tomatoes":45,"Beef Stock":30,"Onion":15,"Zucchini":15,"Carrot":15,"Vegetable Oil":1,"Salt":2,"Pepper":0.5,"Spaghetti":68}},
+        "Beef Chow Mein": {"batch":80,"ingredients": {"Beef Mince":120,"Celery":42,"Carrot":42,"Cabbage":42,"Onion":42,"Oil":2,"Pepper":0.8,"Soy Sauce":13,"Oyster Sauce":13,"Rice":130}},
+        "Shepherd's Pie": {"batch":82,"ingredients": {"Beef Mince":100,"Oil":2,"Carrots":15,"Capsicum":15,"Onion":15,"Mushroom":15,"Peas":15,"Tomato Paste":6,"Beef Stock":20,"Salt":2,"Pepper":0.5,"Napoli Sauce":70}},
+        "Beef Burrito Bowl": {"batch":130,"ingredients": {"Beef Mince":95,"Onion":12,"Capsicum":12,"Vegetable Oil":2,"Taco Seasoning":7,"Salt":1.5,"Pepper":0.5,"Beef Stock":40}},
+        "Beef Meatballs": {"batch":0,"ingredients": {"Mince":150,"Onion":10,"Parsley":3,"Salt":1.5,"Pepper":0.2}},
+        "Lebanese Beef Stew": {"batch":80,"ingredients": {"Chuck Diced":97,"Onion":30,"Carrot":30,"Potato":30,"Peas":30,"Oil":2,"Salt":2.5,"Pepper":0.5,"Tomato Paste":20,"Water":30,"Beef Stock":30,"Rice":130}},
+        "Mongolian Beef": {"batch":0,"ingredients": {"Chuck":97,"Baking Soda":2.5,"Water":10,"Soy Sauce":5,"Cornflour":2.5}},
+        "Chicken With Vegetables": {"batch":0,"ingredients": {"Chicken":135,"Corn":52,"Beans":60,"Broccoli":67}},
+        "Chicken Sweet Potato and Beans": {"batch":0,"ingredients": {"Chicken":135,"Beans":60}},
+        "Naked Chicken Parma": {"batch":0,"ingredients": {"Chicken":150}},
+        "Chicken Pesto Pasta": {"batch":0,"ingredients": {"Chicken":130,"Penne":59,"Sundried Tomatoes":24}},
+        "Chicken and Broccoli Pasta": {"batch":0,"ingredients": {"Chicken":130,"Penne":59,"Broccoli":40}},
+        "Butter Chicken": {"batch":0,"ingredients": {"Chicken":140,"Peas":40,"Rice":130}},
+        "Thai Green Chicken Curry": {"batch":0,"ingredients": {"Chicken":140,"Rice":130}},
+        "Moroccan Chicken": {"batch":0,"ingredients": {"Chicken":180},"sub_section":{"title":"Chickpea Recipe","ingredients": {"Onion":20,"Zucchini":30,"Red Capsicum":30,"Garlic":2,"Oil":2,"Chickpeas":115,"Mix Spices":1.7,"Chicken Stock":50}}}
     }
-
     meal_column_heights = [pdf.get_y(), pdf.get_y()]
     meal_current_column = 0
-
-    def draw_meal_recipe(column_index, meal_name, data):
-        x = column_x[column_index]
-        y = meal_column_heights[column_index]
-        pdf.set_xy(x, y)
-
-        pdf.set_font("Arial", "B", 11)
-        pdf.set_fill_color(230, 230, 230)
-        pdf.cell(col_width, cell_height, meal_name, ln=1, fill=True)
-
-        pdf.set_x(x)
-        pdf.set_font("Arial", "B", 8)
-        pdf.cell(col_width * 0.3, cell_height, "Ingredient", 1)
-        pdf.cell(col_width * 0.15, cell_height, "Quantity", 1)
-        pdf.cell(col_width * 0.15, cell_height, "Meals", 1)
-        pdf.cell(col_width * 0.25, cell_height, "Batch Total", 1)
-        pdf.cell(col_width * 0.15, cell_height, "Batch", 1)
-        pdf.ln(cell_height)
-
-        pdf.set_font("Arial", "", 8)
-        total_meals = meal_totals.get(meal_name.upper(), 0)
-        batches = math.ceil(total_meals / data.get("batch", 0)) if data.get("batch", 0) > 0 else ""
-        for i, (ing, qty) in enumerate(data.get("ingredients", {}).items()):
-            total_qty = qty * total_meals
-            num_batches = math.ceil(total_meals / data.get("batch", 0)) if data.get("batch", 0) > 0 else 0
-            batch_total = round(total_qty / num_batches) if num_batches > 0 else 0
-            batch_label = str(batches) if i == 0 else ""
-
-            pdf.set_x(x)
-            pdf.cell(col_width * 0.3, cell_height, ing[:20], 1)
-            pdf.cell(col_width * 0.15, cell_height, str(qty), 1)
-            pdf.cell(col_width * 0.15, cell_height, str(total_meals), 1)
-            pdf.cell(col_width * 0.25, cell_height, str(batch_total), 1)
-            pdf.cell(col_width * 0.15, cell_height, batch_label, 1)
-            pdf.ln(cell_height)
-
-        meal_column_heights[column_index] = pdf.get_y() + padding_after_table
-
     for meal_name, data in meal_recipes.items():
-        est_height = meal_column_heights[meal_current_column] + (len(data.get("ingredients", {})) + 2) * cell_height + padding_after_table
-        if est_height > 270:
-            meal_current_column = 1 - meal_current_column
-        draw_meal_recipe(meal_current_column, meal_name, data)
+        # Draw each recipe table
+        x = column_x[meal_current_column]
+        y = meal_column_heights[meal_current_column]
+        pdf.set_xy(x, y)
+        pdf.set_font("Arial","B",11)
+        pdf.set_fill_color(230,230,230)
+        pdf.cell(col_width,cell_height,meal_name,ln=1,fill=True)
+        pdf.set_x(x)
+        pdf.set_font("Arial","B",8)
+        pdf.cell(col_width*0.3,cell_height,"Ingredient",1)
+        pdf.cell(col_width*0.15,cell_height,"Qty/Meal",1)
+        pdf.cell(col_width*0.15,cell_height,"Meals",1)
+        pdf.cell(col_width*0.25,cell_height,"Batch Total",1)
+        pdf.cell(col_width*0.15,cell_height,"Batch",1)
+        pdf.ln(cell_height)
+        pdf.set_font("Arial","",8)
+        total_meals = meal_totals.get(meal_name.upper(),0)
+        batches = math.ceil(total_meals/data.get("batch",1)) if data.get("batch",0)>0 else 0
+        for i,(ing,qty) in enumerate(data.get("ingredients",{}).items()):
+            total_qty = qty*total_meals
+            batch_total = round(total_qty/batches) if batches>0 else 0
+            batch_label = str(batches) if i==0 else ""
+            pdf.set_x(x)
+            pdf.cell(col_width*0.3,cell_height,ing[:20],1)
+            pdf.cell(col_width*0.15,cell_height,str(qty),1)
+            pdf.cell(col_width*0.15,cell_height,str(total_meals),1)
+            pdf.cell(col_width*0.25,cell_height,str(batch_total),1)
+            pdf.cell(col_width*0.15,cell_height,batch_label,1)
+            pdf.ln(cell_height)
+        meal_column_heights[meal_current_column] = pdf.get_y()+padding_after_table
+        # Next column if space
+        est = meal_column_heights[meal_current_column] + (len(data.get("ingredients",{}))+2)*cell_height + padding_after_table
+        if est>270: meal_current_column = 1-meal_current_column
 
     # ----------------------------
-    # Page 3: Sauces Requirements
+    # Page 3: Sauces
     # ----------------------------
     pdf.add_page()
-    pdf.set_font("Arial", "B", 14)
-    pdf.cell(0, 10, "Sauces Requirements", ln=True, align="C")
+    pdf.set_font("Arial","B",14)
+    pdf.cell(0,10,"Sauces",ln=True,align="C")
     pdf.ln(5)
 
-    sauce_totals = {}
-    for name, data in meal_recipes.items():
-        total_meals = meal_totals.get(name.upper(), 0)
-        for ing, qty in data.get("ingredients", {}).items():
-            if "sauce" in ing.lower():
-                sauce_totals[ing] = sauce_totals.get(ing, 0) + qty * total_meals
-
-    pdf.set_font("Arial", "B", 8)
-    pdf.cell(col_width * 0.5, cell_height, "Sauce", 1)
-    pdf.cell(col_width * 0.5, cell_height, "Total Quantity", 1)
-    pdf.ln(cell_height)
-
-    pdf.set_font("Arial", "", 8)
-    for sauce, total_qty in sauce_totals.items():
-        pdf.cell(col_width * 0.5, cell_height, sauce[:20], 1)
-        pdf.cell(col_width * 0.5, cell_height, str(total_qty), 1)
+    sauces = {
+        "Thai Sauce": {"ingredients":[("Green Curry Paste",7),("Coconut Cream",82)],"meal_key":"THAI GREEN CHICKEN CURRY"},
+        "Lamb Sauce": {"ingredients":[("Greek Yogurt",20),("Garlic",2),("Salt",1)],"meal_key":"LAMB SOUVLAKI"}
+    }
+    for sauce_name, sauce_data in sauces.items():
+        total_meals = meal_totals.get(sauce_data["meal_key"],0)
+        # Title
+        pdf.set_font("Arial","B",11)
+        pdf.set_fill_color(230,230,230)
+        pdf.cell(col_width*2+10,cell_height,sauce_name,ln=1,fill=True)
+        # Header row
+        pdf.set_x(left_margin)
+        pdf.set_font("Arial","B",8)
+        pdf.cell(col_width*0.5,cell_height,"Ingredient",1)
+        pdf.cell(col_width*0.25,cell_height,"Meal Amount",1)
+        pdf.cell(col_width*0.25,cell_height,"Total Meals",1)
+        pdf.cell(col_width*0.5,cell_height,"Required Ingredient",1)
         pdf.ln(cell_height)
+        # Rows
+        pdf.set_font("Arial","",8)
+        for ing, meal_amt in sauce_data["ingredients"]:
+            req = meal_amt * total_meals
+            pdf.set_x(left_margin)
+            pdf.cell(col_width*0.5,cell_height,ing[:20],1)
+            pdf.cell(col_width*0.25,cell_height,str(meal_amt),1)
+            pdf.cell(col_width*0.25,cell_height,str(total_meals),1)
+            pdf.cell(col_width*0.5,cell_height,str(req),1)
+            pdf.ln(cell_height)
+        pdf.ln(4)
 
     # Output PDF
     filename_date = datetime.today().strftime("%d-%m-%Y")
     pdf_path = f"daily_production_report_{filename_date}.pdf"
     pdf.output(pdf_path)
-    with open(pdf_path, "rb") as f:
-        st.download_button("📄 Download Bulk Order PDF", f, file_name=pdf_path, mime="application/pdf")
+    with open(pdf_path,"rb") as f:
+        st.download_button("📄 Download Bulk Order PDF",f,file_name=pdf_path,mime="application/pdf")
