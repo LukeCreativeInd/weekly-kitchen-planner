@@ -243,6 +243,11 @@ pdf.set_xy(left, max(heights) + pad)
 # ------------------
 # To Pack In Fridge (2-column layout)
 # ------------------
+pdf.set_font("Arial","B",14)
+pdf.cell(0,10,"To Pack In Fridge",ln=1,align='C')
+pdf.ln(5)
+# prepare table data
+# ------------------
 # prepare table data
 sauce_prep = [
     ("MONGOLIAN", 70, "MONGOLIAN BEEF"),
@@ -312,8 +317,7 @@ for ingr,qty in pm_rows:
     pdf.cell(col_w*0.4,ch,ingr,1); pdf.cell(col_w*0.3,ch,str(qty),1); pdf.cell(col_w*0.3,ch,str(amt_pm),1)
     pdf.ln(ch)
 fridge_heights[fridge_col] = pdf.get_y() + pad
-# After fridge tables, new page for Chicken Mixing
-pdf.add_page()
+# After fridge tables, continue with Chicken Mixing without new page
 # ------------------
 pdf.ln(5)
 pdf.set_font("Arial","B",14)
