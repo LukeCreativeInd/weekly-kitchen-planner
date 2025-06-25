@@ -243,6 +243,11 @@ if uploaded_file:
     pdf.cell(0,10,"To Pack In Fridge",ln=1,align='C')
     pdf.ln(5)
 
+    # Table heading: Sauces to Prepare
+    pdf.set_font("Arial","B",12)
+    pdf.cell(0, ch, "Sauces to Prepare", ln=1)
+    pdf.ln(2)
+
     sauce_prep = [
         ("MONGOLIAN", 70, "MONGOLIAN BEEF"),
         ("MEATBALLS", 120, "BEEF MEATBALLS"),
