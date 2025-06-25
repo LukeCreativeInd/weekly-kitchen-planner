@@ -352,6 +352,72 @@ if uploaded_file:
 
     filename_date = datetime.today().strftime("%d-%m-%Y")
     pdf_path = f"daily_production_report_{filename_date}.pdf"
-    pdf.output(pdf_path)
+    
+# ----------------------------
+# SAUCE SECTION DEFINITIONS
+# ----------------------------
+sauce_sections = [
+    {
+        "title": "Thai Sauce",
+        "meal": "THAI GREEN CHICKEN CURRY",
+        "ingredients": {
+            "Green Curry Paste": 7,
+            "Coconut Cream": 82
+        }
+    },
+    {
+        "title": "Lamb Sauce",
+        "meal": "LAMB SOUVLAKI",
+        "ingredients": {
+            "Greek Yogurt": 20,
+            "Garlic": 2,
+            "Salt": 1
+        }
+    }
+]
+
+# Draw Sauce Section on final page
+pdf.add_page()
+pdf.set_font("Arial", "B", 14)
+pdf.cell(0, 10, "Sauce Recipes", ln=True, align="C")
+pdf.ln(5)
+
+sauce_column_heights = [pdf.get_y(), pdf.get_y()]
+sauce_current_column = 0
+
+def draw_sauce_section(column_index, title, ingredients_dict, total_meals):
+    x = column_x[column_index]
+    y = sauce_column_heights[column_index]
+    pdf.set_xy(x, y)
+
+    pdf.set_font("Arial", "B", 11)
+    pdf.set_fill_color(230, 230, 230)
+    pdf.cell(col_width, cell_height, title, ln=1, fill=True)
+
+    pdf.set_x(x)
+    pdf.set_font("Arial", "B", 8)
+    pdf.cell(col_width * 0.4, cell_height, "Ingredient", 1)
+    pdf.cell(col_width * 0.2, cell_height, "Meal Amt", 1)
+    pdf.cell(col_width * 0.2, cell_height, "Total Meals", 1)
+    pdf.cell(col_width * 0.2, cell_height, "Required", 1)
+    pdf.ln(cell_height)
+
+    pdf.set_font("Arial", "", 8)
+    for ingredient, meal_amt in ingredients_dict.items():
+        required = meal_amt * total_meals
+        pdf.set_x(x)
+        pdf.cell(col_width * 0.4, cell_height, ingredient[:20], 1)
+        pdf.cell(col_width * 0.2, cell_height, str(meal_amt), 1)
+        pdf.cell(col_width * 0.2, cell_height, str(total_meals), 1)
+        pdf.cell(col_width * 0.2, cell_height, str(required), 1)
+        pdf.ln(cell_height)
+
+    sauce_column_heights[column_index] = pdf.get_y() + padding_after_table
+
+for sauce in sauce_sections:
+    draw_sauce_section(sauce_current_column, sauce["title"], sauce["ingredients"], meal_totals.get(sauce["meal"], 0))
+    sauce_current_column = 1 - sauce_current_column
+
+pdf.output(pdf_path)
     with open(pdf_path, "rb") as f:
         st.download_button("\U0001F4C4 Download Bulk Order PDF", f, file_name=pdf_path, mime="application/pdf")
