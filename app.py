@@ -313,7 +313,7 @@ for ingr,qty in pm_rows:
     pdf.ln(ch)
 fridge_heights[fridge_col] = pdf.get_y() + pad
 # After fridge tables, new page for Chicken Mixing
-pdf.add_page()}]} + Mixes
+pdf.add_page()
 # ------------------
 pdf.ln(5)
 pdf.set_font("Arial","B",14)
