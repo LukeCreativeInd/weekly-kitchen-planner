@@ -270,7 +270,9 @@ for title, rows, headers in tables:
     col_heights[col] = pdf.get_y() + pad
 
 # ---- Chicken Mixing ----
-mix_start = min(col_heights)
+# start below the lowest fridge table
+mix_start = max(col_heights)
+pdf.set_xy(left, mix_start)
 pdf.set_xy(left, mix_start)
 pdf.set_font("Arial","B",14)
 pdf.cell(0,10,"Chicken Mixing",ln=1,align='C')
