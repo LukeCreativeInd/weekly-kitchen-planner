@@ -280,10 +280,11 @@ if uploaded_file:
         pdf.cell(col_w*0.2, ch, str(total), 1)
         pdf.ln(ch)
 
-        # ------------------
-    # Page5: Chicken Mixing
+            # ------------------
+    # Chicken Mixing (moved after Sauces)
     # ------------------
-    pdf.add_page()
+    # No new page; placed under the previous Sauces table
+    pdf.ln(5)
     pdf.set_font("Arial","B",14)
     pdf.cell(0,10,"Chicken Mixing",ln=1,align='C')
     pdf.ln(5)
@@ -302,7 +303,7 @@ if uploaded_file:
     pdf.cell(col_w*0.2, ch, "Quantity", 1)
     pdf.cell(col_w*0.2, ch, "Amount", 1)
     pdf.cell(col_w*0.2, ch, "Total", 1)
-    pdf.cell(col_w*0.1, ch, "Batches", 1)
+    pdf.cell(col_w*0.15, ch, "Batches", 1)
     pdf.ln(ch)
 
     # Data rows
@@ -316,10 +317,14 @@ if uploaded_file:
         pdf.cell(col_w*0.2, ch, str(qty), 1)
         pdf.cell(col_w*0.2, ch, str(amount), 1)
         pdf.cell(col_w*0.2, ch, str(round(total, 2)), 1)
-        pdf.cell(col_w*0.1, ch, str(batches), 1)
+        pdf.cell(col_w*0.15, ch, str(batches), 1)
         pdf.ln(ch)
 
     # Save & download
+    fname = f"daily_production_report_{datetime.today().strftime('%d-%m-%Y')}.pdf"
+    pdf.output(fname)
+    with open(fname, "rb") as f:
+        st.download_button("📄 Download Bulk Order PDF", f, file_name=fname, mime="application/pdf")
     fname = f"daily_production_report_{datetime.today().strftime('%d-%m-%Y')}.pdf"
     pdf.output(fname)
     with open(fname, "rb") as f:
