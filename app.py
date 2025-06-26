@@ -191,9 +191,9 @@ pdf.ln(5)
 y0 = pdf.get_y()
 heights3 = []
 sauces = {
-    "Thai Sauce": {"ingredients":[("Green Curry Paste",7),("Coconut Cream",82)], "meal_key":"THAI GREEN CHICK
-
+    "Thai Sauce": {"ingredients":[("Green Curry Paste",7),("Coconut Cream",82)], "meal_key":"THAI GREEN CHICKEN CURRY"},
     "Lamb Sauce": {"ingredients":[("Greek Yogurt",20),("Garlic",2),("Salt",1)], "meal_key":"LAMB SOUVLAKI"}
+}
 }
 # draw sauces side-by-side
 for idx,(name,data) in enumerate(sauces.items()):
