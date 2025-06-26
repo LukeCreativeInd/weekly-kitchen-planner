@@ -233,53 +233,49 @@ pdf.cell(0,10,"To Pack In Fridge",ln=1,align='C')
 pdf.ln(5)
 
 # Tables for To Pack In Fridge
-col_heights = [pdf.get_y(), pdf.get_y()]
-# Table 1: Sauces to Prepare in col0
-x = xpos[0]
-pdf.set_xy(x, col_heights[0])
+start_y = pdf.get_y()
+
+# Table 1: Sauces to Prepare in column 0
+pdf.set_xy(xpos[0], start_y)
 pdf.set_font("Arial","B",11); pdf.set_fill_color(230,230,230)
 pdf.cell(col_w, ch, "Sauces to Prepare", ln=1, fill=True)
-pdf.set_x(x); pdf.set_font("Arial","B",8)
+pdf.set_x(xpos[0]); pdf.set_font("Arial","B",8)
 for h,w in [("Sauce",0.4),("Qty",0.2),("Amt",0.2),("Total",0.2)]: pdf.cell(col_w*w, ch, h, 1)
 pdf.ln(ch); pdf.set_font("Arial","",8)
 for s,qty,mk in [("MONGOLIAN",70,"MONGOLIAN BEEF"),("MEATBALLS",120,"BEEF MEATBALLS"),("LEMON",50,"ROASTED LEMON CHICKEN"),("MUSHROOM",100,"STEAK WITH MUSHROOM SAUCE"),("FAJITA SAUCE",33,"CHICKEN FAJITA BOWL")]:
     amt = meal_totals.get(mk.upper(),0)
-    pdf.set_x(x);
+    pdf.set_x(xpos[0])
     pdf.cell(col_w*0.4, ch, s,1); pdf.cell(col_w*0.2, ch, str(qty),1); pdf.cell(col_w*0.2, ch, str(amt),1); pdf.cell(col_w*0.2, ch, str(qty*amt),1)
     pdf.ln(ch)
-col_heights[0] = pdf.get_y() + pad
-# Table 2: Beef Burrito Mix in col1
-x1 = xpos[1]
-pdf.set_xy(x1, col_heights[1])
+
+# Table 2: Beef Burrito Mix fixed in column 1
+pdf.set_xy(xpos[1], start_y)
 pdf.set_font("Arial","B",11); pdf.set_fill_color(230,230,230)
 pdf.cell(col_w, ch, "Beef Burrito Mix", ln=1, fill=True)
-pdf.set_x(x1); pdf.set_font("Arial","B",8)
+pdf.set_x(xpos[1]); pdf.set_font("Arial","B",8)
 for h,w in [("Ingredient",0.3),("Qty",0.2),("Amt",0.2),("Total",0.2),("Batch",0.1)]: pdf.cell(col_w*w, ch, h, 1)
 pdf.ln(ch); pdf.set_font("Arial","",8)
 amt_bb = meal_totals.get("BEEF BURRITO BOWL",0)
 rb = math.ceil(amt_bb/60) if amt_bb>0 else 0; batches_bb = rb + (rb%2)
 for ingr,qty in [("Salsa",43),("Black Beans",50),("Corn",50),("Rice",130)]:
     total_bb = (qty*amt_bb)/batches_bb if batches_bb else 0
-    pdf.set_x(x1);
+    pdf.set_x(xpos[1])
     pdf.cell(col_w*0.3, ch, ingr,1); pdf.cell(col_w*0.2, ch, str(qty),1); pdf.cell(col_w*0.2, ch, str(amt_bb),1); pdf.cell(col_w*0.2, ch, str(round(total_bb,2)),1); pdf.cell(col_w*0.1, ch, str(batches_bb),1)
     pdf.ln(ch)
-col_heights[1] = pdf.get_y() + pad
-# Table 3: Parma Mix dynamic
-block_h = (len([("Napoli Sauce",50),("Mozzarella Cheese",40)]) + 2)*ch + pad
-col_heights, tbl_col = next_pos(col_heights, 0, block_h)
-x2 = xpos[tbl_col]
-pdf.set_xy(x2, col_heights[tbl_col])
+
+# Table 3: Parma Mix in column 0 beneath Table 1
+parma_start = pdf.get_y() if pdf.get_y() > start_y else (start_y + (len([("MONGOLIAN",70,"MONGOLIAN BEEF"),("MEATBALLS",120,"BEEF MEATBALLS"),("LEMON",50,"ROASTED LEMON CHICKEN"),("MUSHROOM",100,"STEAK WITH MUSHROOM SAUCE"),("FAJITA SAUCE",33,"CHICKEN FAJITA BOWL")])*ch) + pad)
+pdf.set_xy(xpos[0], parma_start)
 pdf.set_font("Arial","B",11); pdf.set_fill_color(230,230,230)
 pdf.cell(col_w, ch, "Parma Mix", ln=1, fill=True)
-pdf.set_x(x2); pdf.set_font("Arial","B",8)
+pdf.set_x(xpos[0]); pdf.set_font("Arial","B",8)
 for h,w in [("Ingredient",0.4),("Qty",0.3),("Amt",0.3)]: pdf.cell(col_w*w, ch, h, 1)
 pdf.ln(ch); pdf.set_font("Arial","",8)
 amt_pm = meal_totals.get("NAKED CHICKEN PARMA",0)
 for ingr,qty in [("Napoli Sauce",50),("Mozzarella Cheese",40)]:
-    pdf.set_x(x2);
+    pdf.set_x(xpos[0])
     pdf.cell(col_w*0.4, ch, ingr,1); pdf.cell(col_w*0.3, ch, str(qty),1); pdf.cell(col_w*0.3, ch, str(amt_pm),1)
     pdf.ln(ch)
-col_heights[tbl_col] = pdf.get_y() + pad
 
 # ---- Chicken Mixing ----
 # start below the lowest fridge table
