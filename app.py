@@ -12,7 +12,7 @@ bulk_sections = [
      "ingredients": {"Spaghetti": 68, "Oil": 0.7}, "meals": ["Spaghetti Bolognese"]},
     {"title": "Penne Order", "batch_ingredient": "Penne", "batch_size": 157,
      "ingredients": {"Penne": 59, "Oil": 0.7}, "meals": ["Chicken Pesto Pasta", "Chicken and Broccoli Pasta"]},
-    {"title": "Rice Order", "batch_ingredient": "Rice", "batch_size": 180,
+    {"title": "Rice Order", "batch_ingredient": "Rice", "batch_size": 900,
      "ingredients": {"Rice": 60, "Oil": 0.7},
      "meals": ["Beef Chow Mein", "Beef Burrito Bowl", "Lebanese Beef Stew", "Mongolian Beef", "Butter Chicken", "Thai Green Chicken Curry", "Beans Nacho", "Chicken Fajita Bowl"]},
     {"title": "Moroccan Chicken", "batch_ingredient": "Chicken", "batch_size": 0,
