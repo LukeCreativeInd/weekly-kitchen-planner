@@ -219,66 +219,88 @@ for idx,(name,data) in enumerate(sauces.items()):
 fridge_y = max(heights3) + pad
 pdf.set_xy(left, fridge_y)
 pdf.set_font("Arial","B",14)
-pdf.cell(0,10,"To Pack In Fridge", ln=1, align='C')
+pdf.cell(0,10,"To Pack In Fridge",ln=1,align='C')
 pdf.ln(5)
 
-# Table 1: Sauces to Prepare
-fridge_tables = [
-    ("Sauces to Prepare", [("MONGOLIAN",70,"MONGOLIAN BEEF"),("MEATBALLS",120,"BEEF MEATBALLS"),
-                           ("LEMON",50,"ROASTED LEMON CHICKEN"),("MUSHROOM",100,"STEAK WITH MUSHROOM SAUCE"),
-                           ("FAJITA SAUCE",33,"CHICKEN FAJITA BOWL"),("BURRITO SAUCE",43,"BEEF BURRITO BOWL")], xpos[0], 0.4, 0.2)
-    ,
-    ("Beef Burrito Mix", [("Salsa",43),("Black Beans",50),("Corn",50),("Rice",130)], xpos[1], 0.4, 0.2)
-]
+# Fixed dual-column start
+fridge_start = pdf.get_y()
 
-for title, rows, x0, w1, w2 in fridge_tables:
-    pdf.set_xy(x0, pdf.get_y() + (0 if title=="Sauces to Prepare" else 0))
-    pdf.set_font("Arial","B",11); pdf.set_fill_color(230,230,230)
-    pdf.cell(col_w, ch, title, ln=1, fill=True)
-    pdf.set_x(x0); pdf.set_font("Arial","B",8)
-    if title=="Sauces to Prepare":
-        headers = [("Sauce",w1),("Qty",w2),("Amt",w2),("Total",w2)]
-        for h,w in headers:
-            pdf.cell(col_w*w, ch, h, 1)
-        pdf.ln(ch); pdf.set_font("Arial","",8)
-        for sauce,qty,meal_key in rows:
-            amt = meal_totals.get(meal_key,0)
-            tot = qty * amt
-            pdf.set_x(x0)
-            pdf.cell(col_w*w1, ch, sauce, 1)
-            pdf.cell(col_w*w2, ch, str(qty), 1)
-            pdf.cell(col_w*w2, ch, str(amt), 1)
-            pdf.cell(col_w*w2, ch, str(tot), 1)
-            pdf.ln(ch)
-    else:
-        headers = [("Ingredient",w1),("Qty",w2),("Amt",w2),("Total",w2)]
-        for h,w in headers:
-            pdf.cell(col_w*w, ch, h, 1)
-        pdf.ln(ch); pdf.set_font("Arial","",8)
-        for ing,qty in rows:
-            amt = meal_totals.get("BEEF BURRITO BOWL",0)
-            tot = (qty * amt) / 60 if amt else 0
-            pdf.set_x(x0)
-            pdf.cell(col_w*w1, ch, ing, 1)
-            pdf.cell(col_w*w2, ch, str(qty), 1)
-            pdf.cell(col_w*w2, ch, str(amt), 1)
-            pdf.cell(col_w*w2, ch, str(round(tot,2)), 1)
-            pdf.ln(ch)
+# Column 1: Sauces to Prepare
+pdf.set_xy(xpos[0], fridge_start)
+pdf.set_font("Arial","B",11); pdf.set_fill_color(230,230,230)
+pdf.cell(col_w, ch, "Sauces to Prepare", ln=1, fill=True)
+pdf.set_x(xpos[0]); pdf.set_font("Arial","B",8)
+for h,w in [("Sauce",0.4),("Qty",0.2),("Amt",0.2),("Total",0.2)]:
+    pdf.cell(col_w*w, ch, h, 1)
+pdf.ln(ch); pdf.set_font("Arial","",8)
+for sauce, qty, key in [
+    ("MONGOLIAN",70,"MONGOLIAN BEEF"),
+    ("MEATBALLS",120,"BEEF MEATBALLS"),
+    ("LEMON",50,"ROASTED LEMON CHICKEN"),
+    ("MUSHROOM",100,"STEAK WITH MUSHROOM SAUCE"),
+    ("FAJITA SAUCE",33,"CHICKEN FAJITA BOWL"),
+    ("BURRITO SAUCE",43,"BEEF BURRITO BOWL")
+]:
+    amt = meal_totals.get(key.upper(),0)
+    total = qty * amt
+    pdf.set_x(xpos[0])
+    pdf.cell(col_w*0.4, ch, sauce, 1)
+    pdf.cell(col_w*0.2, ch, str(qty), 1)
+    pdf.cell(col_w*0.2, ch, str(amt), 1)
+    pdf.cell(col_w*0.2, ch, str(total), 1)
+    pdf.ln(ch)
+
+# Column 2: Beef Burrito Mix (aligned to same fridge_start)
+pdf.set_xy(xpos[1], fridge_start)
+pdf.set_font("Arial","B",11); pdf.set_fill_color(230,230,230)
+pdf.cell(col_w, ch, "Beef Burrito Mix", ln=1, fill=True)
+pdf.set_x(xpos[1]); pdf.set_font("Arial","B",8)
+for h,w in [("Ingredient",0.4),("Qty",0.2),("Amt",0.2),("Total",0.2)]:
+    pdf.cell(col_w*w, ch, h, 1)
+pdf.ln(ch); pdf.set_font("Arial","",8)
+for ing, qty in [("Salsa",43),("Black Beans",50),("Corn",50),("Rice",130)]:
+    amt = meal_totals.get("BEEF BURRITO BOWL",0)
+    total = (qty * amt) / 60 if amt else 0
+    pdf.set_x(xpos[1])
+    pdf.cell(col_w*0.4, ch, ing, 1)
+    pdf.cell(col_w*0.2, ch, str(qty), 1)
+    pdf.cell(col_w*0.2, ch, str(amt), 1)
+    pdf.cell(col_w*0.2, ch, f"{total:.2f}", 1)
+    pdf.ln(ch)
+
+# Column 1 under Sauces: Parma Mix
+parma_start = fridge_start + (len([
+    ("MONGOLIAN",70),("MEATBALLS",120),("LEMON",50),("MUSHROOM",100),("FAJITA SAUCE",33),("BURRITO SAUCE",43)
+]) + 2) * ch + pad
+pdf.set_xy(xpos[0], parma_start)
+pdf.set_font("Arial","B",11); pdf.set_fill_color(230,230,230)
+pdf.cell(col_w, ch, "Parma Mix", ln=1, fill=True)
+pdf.set_x(xpos[0]); pdf.set_font("Arial","B",8)
+for h,w in [("Ingredient",0.4),("Qty",0.2),("Amt",0.2),("Total",0.2)]:
+    pdf.cell(col_w*w, ch, h, 1)
+pdf.ln(ch); pdf.set_font("Arial","",8)
+for ing, qty in [("Napoli Sauce",50),("Mozzarella Cheese",40)]:
+    amt = meal_totals.get("NAKED CHICKEN PARMA",0)
+    total = qty * amt
+    pdf.set_x(xpos[0])
+    pdf.cell(col_w*0.4, ch, ing, 1)
+    pdf.cell(col_w*0.2, ch, str(qty), 1)
+    pdf.cell(col_w*0.2, ch, str(amt), 1)
+    pdf.cell(col_w*0.2, ch, str(total), 1)
+    pdf.ln(ch)
+
 
 # ---- Chicken Mixing ----
-mix_y = pdf.get_y() + pad
-pdf.set_xy(left, mix_y)
+# Estimate height needed: assume worst-case 6 rows per mix * number of mixes + header
+est_rows = sum(1 + len(m[1]) for m in mixes) + 2
+est_h = est_rows * ch + 2*pad + 20  # +20 for title
+current_y = pdf.get_y()
+if current_y + est_h > bottom:
+    pdf.add_page()
+pdf.set_xy(left, pdf.get_y())
 pdf.set_font("Arial","B",14)
 pdf.cell(0,10,"Chicken Mixing", ln=1, align='C')
 pdf.ln(5)
-
-mixes = [
-    ("Pesto", [("Chicken",110),("Sauce",80)], "CHICKEN PESTO PASTA", 50),
-    ("Butter Chicken", [("Chicken",120),("Sauce",90)], "BUTTER CHICKEN", 50),
-    ("Broccoli Pasta", [("Chicken",100),("Sauce",100)], "CHICKEN AND BROCCOLI PASTA", 50),
-    ("Thai", [("Chicken",110),("Sauce",90)], "THAI GREEN CHICKEN CURRY", 50),
-    ("Gnocchi", [("Gnocchi",150),("Chicken",80),("Sauce",200),("Spinach",25)], "CREAMY CHICKEN & MUSHROOM GNOCCHI", 36)
-]
 
 for title, ingredients, meal_key, divisor in mixes:
     pdf.set_font("Arial","B",11); pdf.set_fill_color(230,230,230)
@@ -288,18 +310,19 @@ for title, ingredients, meal_key, divisor in mixes:
     for h,w in [("Ingredient",0.3),("Qty",0.2),("Amt",0.2),("Total",0.2),("Batch",0.1)]:
         pdf.cell(col_w*w, ch, h, 1)
     pdf.ln(ch); pdf.set_font("Arial","",8)
-    amt = meal_totals.get(meal_key,0)
+    amt = meal_totals.get(meal_key.upper(),0)
     raw_b = math.ceil(amt/divisor) if divisor>0 else 0
     batches = raw_b + (raw_b % 2)
-    for ing,qty in ingredients:
+    for ing, qty in ingredients:
         total = (qty * amt) / batches if batches else 0
-        pdf.set_x(left)
         pdf.cell(col_w*0.3, ch, ing[:20], 1)
         pdf.cell(col_w*0.2, ch, str(qty), 1)
         pdf.cell(col_w*0.2, ch, str(amt), 1)
         pdf.cell(col_w*0.2, ch, str(round(total,2)), 1)
         pdf.cell(col_w*0.1, ch, str(batches), 1)
         pdf.ln(ch)
+    pdf.ln(2)
+
 
 # ---- Save & Download ----
 fname = f"daily_production_report_{datetime.today().strftime('%d-%m-%Y')}.pdf"
