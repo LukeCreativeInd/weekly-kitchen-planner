@@ -30,26 +30,22 @@ bulk_sections = [
      "ingredients":{"Green Beans":60},"meals":["Chicken with Vegetables","Chicken Sweet Potato and Beans","Steak with Mushroom Sauce"]}
 ]
 
-def draw_bulk_section(pdf, meal_totals, xpos, col_w, ch, pad, bottom, start_y):
-    pdf.set_y(start_y)
+def draw_bulk_section(pdf, meal_totals, xpos, col_w, ch, pad, bottom):
     title1 = f"Daily Production Report - {pdf.page_no()}"
+    pdf.add_page()
     pdf.set_font("Arial","B",14)
     pdf.cell(0,10,title1,ln=1,align='C')
     pdf.ln(5)
     heights = [pdf.get_y(), pdf.get_y()]
-    col = 0
     for sec in bulk_sections:
         block_h = (len(sec['ingredients'])+2)*ch + pad
+        col = 0 if heights[0] <= heights[1] else 1
         if heights[col] + block_h > bottom:
-            col = 1 - col
-            if heights[col] + block_h > bottom:
-                pdf.add_page()
-                pdf.set_font("Arial","B",14)
-                pdf.cell(0,10,title1,ln=1,align='C')
-                pdf.ln(5)
-                heights = [pdf.get_y(), pdf.get_y()]
+            pdf.add_page()
+            heights = [pdf.get_y(), pdf.get_y()]
+            col = 0
         x, y = xpos[col], heights[col]
-        pdf.set_xy(x,y)
+        pdf.set_xy(x, y)
         pdf.set_font("Arial","B",11)
         pdf.set_fill_color(230,230,230)
         pdf.cell(col_w,ch,sec['title'],ln=1,fill=True)
