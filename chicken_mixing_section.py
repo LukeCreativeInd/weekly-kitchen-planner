@@ -1,3 +1,4 @@
+import math
 def draw_chicken_mixing_section(pdf, meal_totals, xpos, col_w, ch, pad, bottom, start_y=None):
     # Section: Chicken Mixing - dual columns
     pdf.set_y(start_y or pdf.get_y())
