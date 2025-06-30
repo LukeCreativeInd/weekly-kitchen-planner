@@ -1,4 +1,4 @@
-def draw_meat_veg_section(pdf, xpos, col_w, ch, pad, bottom):
+def draw_meat_veg_section(pdf, xpos, col_w, ch, pad):
     left = xpos[0]
     y_now = pdf.get_y()
 
