@@ -50,7 +50,7 @@ pdf.set_y(last_y)
 last_y = draw_chicken_mixing_section(pdf, meal_totals, xpos, col_w, ch, pad, bottom, start_y=last_y)
 pdf.set_y(last_y)
 draw_meat_veg_section(pdf, xpos, col_w, ch, pad)
-pdf.set_y(last_y)
+
 
 fname = f"daily_production_report_{datetime.today().strftime('%d-%m-%Y')}.pdf"
 pdf.output(fname)
