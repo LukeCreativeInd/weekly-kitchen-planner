@@ -1,4 +1,4 @@
-def draw_fridge_section(pdf, meal_totals, xpos, col_w, ch, pad, bottom):
+def draw_section(pdf, meal_totals, xpos, col_w, ch, pad, bottom):
     y = max(pdf.get_y(), max(pdf.get_y() for _ in range(2)))
     pdf.set_xy(xpos[0], y)
     pdf.set_font("Arial","B",14)
