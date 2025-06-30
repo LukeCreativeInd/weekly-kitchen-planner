@@ -1,10 +1,11 @@
 def draw_meat_veg_section(pdf, xpos, col_w, ch, pad):
     left = xpos[0]
+    right = xpos[1]
     y_start = pdf.get_y()
-    bottom = 280  # Leave room for footer if any
+    bottom = 280  # Allow space for footers, etc.
 
     # --- Meat Order Table ---
-    pdf.set_xy(left, pdf.get_y())
+    pdf.set_xy(left, y_start)
     pdf.set_font("Arial", "B", 14)
     pdf.cell(col_w, ch + 4, "Meat Order", ln=1)
     pdf.ln(2)
@@ -29,28 +30,9 @@ def draw_meat_veg_section(pdf, xpos, col_w, ch, pad):
         pdf.cell(col_w * 0.6, ch, meat, 1)
         pdf.cell(col_w * 0.4, ch, "0", 1)
         pdf.ln(ch)
-    # Save new Y position
-    new_y = pdf.get_y()
-
-    # If veg prep won't fit, start new column or new page
-    space_needed = (len(meat_types) + 4 + 22 + 3) * ch
-    if new_y + (22 + 3) * ch > bottom:
-        # Move to second column
-        col = 1
-        pdf.set_xy(xpos[col], y_start)
-    else:
-        # Stay in first column, below meat table
-        pdf.set_xy(left, new_y + pad)
+    meat_table_end_y = pdf.get_y()
 
     # --- Veg Prep Table ---
-    pdf.set_font("Arial", "B", 14)
-    pdf.cell(col_w, ch + 4, "Veg Prep", ln=1)
-    pdf.ln(2)
-    pdf.set_font("Arial", "B", 9)
-    pdf.cell(col_w * 0.6, ch, "Veg Prep", 1)
-    pdf.cell(col_w * 0.4, ch, "Amount", 1)
-    pdf.ln(ch)
-    pdf.set_font("Arial", "", 9)
     veg_prep_types = [
         "10MM DICED CARROT",
         "10MM DICED POTATO (LEBO)",
@@ -76,8 +58,30 @@ def draw_meat_veg_section(pdf, xpos, col_w, ch, pad):
         "RED ONION",
         "PARSLEY"
     ]
+    veg_table_height = (2 + len(veg_prep_types)) * ch + pad  # 2 rows for heading and space
+
+    # If there isn't enough room for both on the same column, move Veg Prep to next column, top aligned
+    if meat_table_end_y + veg_table_height > bottom:
+        # Start Veg Prep at y_start in column 2
+        pdf.set_xy(right, y_start)
+    else:
+        # Directly below meat table in column 1
+        pdf.set_xy(left, meat_table_end_y + pad)
+
+    pdf.set_font("Arial", "B", 14)
+    pdf.cell(col_w, ch + 4, "Veg Prep", ln=1)
+    pdf.ln(2)
+    pdf.set_font("Arial", "B", 9)
+    pdf.cell(col_w * 0.6, ch, "Veg Prep", 1)
+    pdf.cell(col_w * 0.4, ch, "Amount", 1)
+    pdf.ln(ch)
+    pdf.set_font("Arial", "", 9)
     for veg in veg_prep_types:
         pdf.set_x(pdf.get_x())
         pdf.cell(col_w * 0.6, ch, veg, 1)
         pdf.cell(col_w * 0.4, ch, "0", 1)
         pdf.ln(ch)
+
+    # After this section, set y to the lower of the two columns (so the next section doesn't overlap)
+    y_after = max(pdf.get_y(), meat_table_end_y)
+    pdf.set_xy(left, y_after + pad)
