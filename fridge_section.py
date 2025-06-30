@@ -36,4 +36,28 @@ def draw_fridge_section(pdf, meal_totals, xpos, col_w, ch, pad, bottom):
                 pdf.cell(col_w*w2, ch, str(tot), 1)
                 pdf.ln(ch)
         else:
-            headers = [("Ingredient",w1),("Qty",
+            headers = [("Ingredient",w1),("Qty",w2),("Amt",w2),("Total",w2)]
+            for h,w in headers:
+                pdf.cell(col_w*w, ch, h, 1)
+            pdf.ln(ch); pdf.set_font("Arial","",8)
+            # "Beef Burrito Mix" and "Parma Mix" table logic
+            if title == "Beef Burrito Mix":
+                amt = meal_totals.get("BEEF BURRITO BOWL",0)
+                for ing,qty in rows:
+                    tot = (qty * amt) / 60 if amt else 0
+                    pdf.set_x(x0)
+                    pdf.cell(col_w*w1, ch, ing, 1)
+                    pdf.cell(col_w*w2, ch, str(qty), 1)
+                    pdf.cell(col_w*w2, ch, str(amt), 1)
+                    pdf.cell(col_w*w2, ch, str(round(tot,2)), 1)
+                    pdf.ln(ch)
+            elif title == "Parma Mix":
+                amt = meal_totals.get("NAKED CHICKEN PARMA",0)
+                for ing,qty in rows:
+                    tot = qty * amt
+                    pdf.set_x(x0)
+                    pdf.cell(col_w*w1, ch, ing, 1)
+                    pdf.cell(col_w*w2, ch, str(qty), 1)
+                    pdf.cell(col_w*w2, ch, str(amt), 1)
+                    pdf.cell(col_w*w2, ch, str(tot), 1)
+                    pdf.ln(ch)
