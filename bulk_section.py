@@ -1,3 +1,4 @@
+import math
 def draw_bulk_section(pdf, meal_totals, xpos, col_w, ch, pad, bottom, start_y=None):
     from datetime import datetime
     bulk_sections = [
