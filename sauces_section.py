@@ -1,4 +1,4 @@
-def draw_sauces_section(pdf, meal_totals, xpos, col_w, ch, pad, bottom):
+def draw_section(pdf, meal_totals, xpos, col_w, ch, pad, bottom):
     pdf.add_page()
     pdf.set_font("Arial","B",14)
     pdf.cell(0,10,"Sauces",ln=1,align='C')
