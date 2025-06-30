@@ -1,14 +1,14 @@
-def draw_sauces_section(pdf, meal_totals, xpos, col_w, ch, pad, bottom):
+def draw_sauces_section(pdf, meal_totals, xpos, col_w, ch, pad, bottom, start_y=None):
     pdf.add_page()
     pdf.set_font("Arial","B",14)
     pdf.cell(0,10,"Sauces",ln=1,align='C')
     pdf.ln(5)
-    y0 = pdf.get_y()
+    y0 = start_y or pdf.get_y()
+    heights = [y0, y0]
     sauces = {
         "Thai Sauce": {"ingredients":[("Green Curry Paste",7),("Coconut Cream",82)], "meal_key":"THAI GREEN CHICKEN CURRY"},
         "Lamb Sauce": {"ingredients":[("Greek Yogurt",20),("Garlic",2),("Salt",1)], "meal_key":"LAMB SOUVLAKI"}
     }
-    heights = []
     for idx,(name,data) in enumerate(sauces.items()):
         x = xpos[idx]
         pdf.set_xy(x, y0)
@@ -19,7 +19,7 @@ def draw_sauces_section(pdf, meal_totals, xpos, col_w, ch, pad, bottom):
         for h,w in [("Ingredient",0.3),("Meal Amount",0.2),("Total Meals",0.2),("Required Ingredient",0.3)]:
             pdf.cell(col_w*w, ch, h, 1)
         pdf.ln(ch); pdf.set_font("Arial","",8)
-        tm = meal_totals.get(data["meal_key"].upper(), 0)
+        tm = meal_totals.get(data["meal_key"], 0)
         for ing, am in data["ingredients"]:
             pdf.set_x(x)
             pdf.cell(col_w*0.3, ch, ing[:20], 1)
@@ -27,4 +27,5 @@ def draw_sauces_section(pdf, meal_totals, xpos, col_w, ch, pad, bottom):
             pdf.cell(col_w*0.2, ch, str(tm), 1)
             pdf.cell(col_w*0.3, ch, str(am*tm), 1)
             pdf.ln(ch)
-        heights.append(pdf.get_y())
+        heights[idx] = pdf.get_y()
+    return max(heights)
