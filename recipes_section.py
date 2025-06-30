@@ -1,3 +1,4 @@
+import math
 def draw_recipes_section(pdf, meal_totals, xpos, col_w, ch, pad, bottom, start_y=None):
     meal_recipes = {
         "Spaghetti Bolognese": {"batch":90, "ingredients":{"Beef Mince":100,"Napoli Sauce":65,"Crushed Tomatoes":45,"Beef Stock":30,"Onion":15,"Zucchini":15,"Carrot":15,"Vegetable Oil":1,"Salt":2,"Pepper":0.5,"Spaghetti":68}},
