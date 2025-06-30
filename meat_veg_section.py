@@ -1,16 +1,7 @@
 def draw_meat_veg_section(pdf, xpos, col_w, ch, pad):
     left = xpos[0]
     y_now = pdf.get_y()
-
-    # Option 1: Start on new page if not enough room for both tables
-    if y_now + (12*ch) > bottom:
-        pdf.add_page()
-        y_now = pdf.get_y()
-
-    # Option 2: Just add some space if near bottom
     pdf.set_xy(left, max(y_now, pdf.get_y()) + pad)
-
-    # Heading
     pdf.set_font("Arial", "B", 14)
     pdf.cell(0, 10, "Meat Order and Veg Prep", ln=1, align='C')
     pdf.ln(4)
@@ -25,15 +16,9 @@ def draw_meat_veg_section(pdf, xpos, col_w, ch, pad):
     pdf.ln(ch)
     pdf.set_font("Arial", "", 8)
     meats = [
-        "CHUCK ROLL (LEBO)",
-        "BEEF TOPSIDE (MONG)",
-        "MINCE",
-        "TOPSIDE STEAK",
-        "LAMB SHOULDER",
-        "MORROCAN CHICKEN",
-        "ITALIAN CHICKEN",
-        "NORMAL CHICKEN",
-        "CHICKEN THIGH"
+        "CHUCK ROLL (LEBO)", "BEEF TOPSIDE (MONG)", "MINCE", "TOPSIDE STEAK",
+        "LAMB SHOULDER", "MORROCAN CHICKEN", "ITALIAN CHICKEN",
+        "NORMAL CHICKEN", "CHICKEN THIGH"
     ]
     for meat in meats:
         pdf.cell(col_w*0.6, ch, meat, 1)
@@ -51,29 +36,12 @@ def draw_meat_veg_section(pdf, xpos, col_w, ch, pad):
     pdf.ln(ch)
     pdf.set_font("Arial", "", 8)
     vegs = [
-        "10MM DICED CARROT",
-        "10MM DICED POTATO (LEBO)",
-        "10MM DICED ZUCCHINI",
-        "5MM DICED CABBAGE",
-        "5MM DICED CAPSICUM",
-        "5MM DICED CARROTS",
-        "5MM DICED CELERY",
-        "5MM DICED MUSHROOMS",
-        "5MM DICED ONION",
-        "5MM MONGOLIAN CAPSICUM",
-        "5MM MONGOLIAN ONION",
-        "5MM SLICED MUSHROOMS",
-        "BROCCOLI",
-        "CRATED CARROTS",
-        "CRATED ZUCCHINI",
-        "LEMON POTATO",
-        "ROASTED POTATO",
-        "THAI POTATOS",
-        "POTATO MASH",
-        "SWEET POTATO MASH",
-        "SPINACH",
-        "RED ONION",
-        "PARSLEY"
+        "10MM DICED CARROT", "10MM DICED POTATO (LEBO)", "10MM DICED ZUCCHINI",
+        "5MM DICED CABBAGE", "5MM DICED CAPSICUM", "5MM DICED CARROTS", "5MM DICED CELERY",
+        "5MM DICED MUSHROOMS", "5MM DICED ONION", "5MM MONGOLIAN CAPSICUM", "5MM MONGOLIAN ONION",
+        "5MM SLICED MUSHROOMS", "BROCCOLI", "CRATED CARROTS", "CRATED ZUCCHINI",
+        "LEMON POTATO", "ROASTED POTATO", "THAI POTATOS", "POTATO MASH", "SWEET POTATO MASH",
+        "SPINACH", "RED ONION", "PARSLEY"
     ]
     for veg in vegs:
         pdf.cell(col_w*0.7, ch, veg, 1)
