@@ -1,6 +1,4 @@
-import math
-
-def draw_recipes_section(pdf, meal_totals, xpos, col_w, ch, pad, bottom):
+def draw_recipes_section(pdf, meal_totals, xpos, col_w, ch, pad, bottom, start_y=None):
     meal_recipes = {
         "Spaghetti Bolognese": {"batch":90, "ingredients":{"Beef Mince":100,"Napoli Sauce":65,"Crushed Tomatoes":45,"Beef Stock":30,"Onion":15,"Zucchini":15,"Carrot":15,"Vegetable Oil":1,"Salt":2,"Pepper":0.5,"Spaghetti":68}},
         "Beef Chow Mein":        {"batch":80, "ingredients":{"Beef Mince":120,"Celery":42,"Carrot":42,"Cabbage":42,"Onion":42,"Oil":2,"Pepper":0.8,"Soy Sauce":13,"Oyster Sauce":13,"Rice":130}},
@@ -23,15 +21,18 @@ def draw_recipes_section(pdf, meal_totals, xpos, col_w, ch, pad, bottom):
     pdf.set_font("Arial","B",14)
     pdf.cell(0,10,"Meal Recipes",ln=1,align='C')
     pdf.ln(5)
-    heights = [pdf.get_y(), pdf.get_y()]
+    heights = [start_y or pdf.get_y(), start_y or pdf.get_y()]
     col = 0
     for name,data in meal_recipes.items():
         rows = 2 + len(data["ingredients"]) + (2 + len(data["sub_section"]["ingredients"]) if "sub_section" in data else 0)
         block_h = rows*ch + pad
-        if heights[col]+block_h > bottom:
+        if heights[col] + block_h > 280:
             col = 1 - col
-            if heights[col]+block_h > bottom:
+            if heights[col] + block_h > 280:
                 pdf.add_page()
+                pdf.set_font("Arial","B",14)
+                pdf.cell(0,10,"Meal Recipes",ln=1,align='C')
+                pdf.ln(5)
                 heights = [pdf.get_y(), pdf.get_y()]
         x,y = xpos[col], heights[col]
         pdf.set_xy(x,y)
@@ -68,3 +69,4 @@ def draw_recipes_section(pdf, meal_totals, xpos, col_w, ch, pad, bottom):
                 pdf.cell(col_w*0.15,ch,"",1)
                 pdf.ln(ch)
         heights[col] = pdf.get_y() + pad
+    return max(heights)
