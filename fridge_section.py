@@ -1,81 +1,73 @@
 def draw_fridge_section(pdf, meal_totals, xpos, col_w, ch, pad, bottom, start_y=None):
-    # Section: To Pack In Fridge - dual columns
-    pdf.set_y(start_y or pdf.get_y())
-    pdf.set_font("Arial","B",14)
-    pdf.cell(0,10,"To Pack In Fridge", ln=1, align='C')
+    # Tables for dual column
+    fridge_tables = [
+        ("Sauces to Prepare", [("MONGOLIAN", 70, "MONGOLIAN BEEF"), ("MEATBALLS", 120, "BEEF MEATBALLS"),
+                              ("LEMON", 50, "ROASTED LEMON CHICKEN"), ("MUSHROOM", 100, "STEAK WITH MUSHROOM SAUCE"),
+                              ("FAJITA SAUCE", 33, "CHICKEN FAJITA BOWL"), ("BURRITO SAUCE", 43, "BEEF BURRITO BOWL")]),
+        ("Beef Burrito Mix", [("Salsa", 43), ("Black Beans", 50), ("Corn", 50), ("Rice", 130)]),
+        ("Parma Mix", [("Napoli Sauce", 50), ("Mozzarella Cheese", 40)]),
+    ]
+    if start_y:
+        pdf.set_y(start_y)
+    y_start = pdf.get_y()
+    pdf.set_font("Arial", "B", 14)
+    pdf.cell(0, 10, "To Pack In Fridge", ln=1, align='C')
     pdf.ln(5)
 
-    # Table 1: Sauces to Prepare (left)
-    x0 = xpos[0]
-    pdf.set_xy(x0, pdf.get_y())
-    pdf.set_font("Arial","B",11)
-    pdf.set_fill_color(230,230,230)
-    pdf.cell(col_w, ch, "Sauces to Prepare", ln=1, fill=True)
-    pdf.set_x(x0)
-    pdf.set_font("Arial","B",8)
-    for h,w in [("Sauce",0.4),("Qty",0.2),("Amt",0.2),("Total",0.2)]:
-        pdf.cell(col_w*w, ch, h, 1)
-    pdf.ln(ch); pdf.set_font("Arial","",8)
-    sauces_to_prepare = [
-        ("MONGOLIAN",70,"MONGOLIAN BEEF"),
-        ("MEATBALLS",120,"BEEF MEATBALLS"),
-        ("LEMON",50,"ROASTED LEMON CHICKEN"),
-        ("MUSHROOM",100,"STEAK WITH MUSHROOM SAUCE"),
-        ("FAJITA SAUCE",33,"CHICKEN FAJITA BOWL"),
-        ("BURRITO SAUCE",43,"BEEF BURRITO BOWL")
-    ]
-    for sauce, qty, meal_key in sauces_to_prepare:
-        amt = meal_totals.get(meal_key.upper(),0)
-        tot = qty * amt
-        pdf.set_x(x0)
-        pdf.cell(col_w*0.4, ch, sauce, 1)
-        pdf.cell(col_w*0.2, ch, str(qty), 1)
-        pdf.cell(col_w*0.2, ch, str(amt), 1)
-        pdf.cell(col_w*0.2, ch, str(tot), 1)
-        pdf.ln(ch)
-
-    # Table 2: Beef Burrito Mix (right)
-    x1 = xpos[1]
-    y1 = pdf.get_y() - (ch*7 + 5)  # Bring top up to same as left table
-    pdf.set_xy(x1, y1)
-    pdf.set_font("Arial","B",11)
-    pdf.set_fill_color(230,230,230)
-    pdf.cell(col_w, ch, "Beef Burrito Mix", ln=1, fill=True)
-    pdf.set_x(x1)
-    pdf.set_font("Arial","B",8)
-    for h,w in [("Ingredient",0.4),("Qty",0.2),("Amt",0.2),("Total",0.2)]:
-        pdf.cell(col_w*w, ch, h, 1)
-    pdf.ln(ch); pdf.set_font("Arial","",8)
-    burrito_mix = [("Salsa",43),("Black Beans",50),("Corn",50),("Rice",130)]
-    amt_burrito = meal_totals.get("BEEF BURRITO BOWL",0)
-    for ing, qty in burrito_mix:
-        tot = (qty * amt_burrito) / 60 if amt_burrito else 0
-        pdf.set_x(x1)
-        pdf.cell(col_w*0.4, ch, ing, 1)
-        pdf.cell(col_w*0.2, ch, str(qty), 1)
-        pdf.cell(col_w*0.2, ch, str(amt_burrito), 1)
-        pdf.cell(col_w*0.2, ch, str(round(tot,2)), 1)
-        pdf.ln(ch)
-
-    # Table 3: Parma Mix (left, below Sauces to Prepare)
-    x0 = xpos[0]
-    pdf.set_xy(x0, pdf.get_y()+pad)
-    pdf.set_font("Arial","B",11)
-    pdf.set_fill_color(230,230,230)
-    pdf.cell(col_w, ch, "Parma Mix", ln=1, fill=True)
-    pdf.set_x(x0)
-    pdf.set_font("Arial","B",8)
-    for h,w in [("Ingredient",0.5),("Qty",0.25),("Amt",0.25)]:
-        pdf.cell(col_w*w, ch, h, 1)
-    pdf.ln(ch); pdf.set_font("Arial","",8)
-    parma_mix = [("Napoli Sauce",50),("Mozzarella Cheese",40)]
-    amt_parma = meal_totals.get("NAKED CHICKEN PARMA",0)
-    for ing, qty in parma_mix:
-        pdf.set_x(x0)
-        pdf.cell(col_w*0.5, ch, ing, 1)
-        pdf.cell(col_w*0.25, ch, str(qty), 1)
-        pdf.cell(col_w*0.25, ch, str(amt_parma), 1)
-        pdf.ln(ch)
-
-    # Return the max y position for column alignment
-    return max(pdf.get_y(), y1+ch*len(burrito_mix)+pad)
+    # First and second table in columns, rest below
+    col_y = [pdf.get_y(), pdf.get_y()]
+    for idx, (title, rows) in enumerate(fridge_tables):
+        col = idx if idx < 2 else 0
+        x = xpos[col]
+        pdf.set_xy(x, col_y[col])
+        pdf.set_font("Arial", "B", 11)
+        pdf.set_fill_color(230, 230, 230)
+        pdf.cell(col_w, ch, title, ln=1, fill=True)
+        pdf.set_x(x)
+        pdf.set_font("Arial", "B", 8)
+        if title == "Sauces to Prepare":
+            headers = [("Sauce", 0.4), ("Qty", 0.2), ("Amt", 0.2), ("Total", 0.2)]
+            for h, w in headers:
+                pdf.cell(col_w * w, ch, h, 1)
+            pdf.ln(ch)
+            pdf.set_font("Arial", "", 8)
+            for sauce, qty, meal_key in rows:
+                amt = meal_totals.get(meal_key, 0)
+                tot = qty * amt
+                pdf.set_x(x)
+                pdf.cell(col_w * 0.4, ch, sauce, 1)
+                pdf.cell(col_w * 0.2, ch, str(qty), 1)
+                pdf.cell(col_w * 0.2, ch, str(amt), 1)
+                pdf.cell(col_w * 0.2, ch, str(tot), 1)
+                pdf.ln(ch)
+        elif title == "Beef Burrito Mix":
+            headers = [("Ingredient", 0.4), ("Qty", 0.2), ("Amt", 0.2), ("Total", 0.2)]
+            for h, w in headers:
+                pdf.cell(col_w * w, ch, h, 1)
+            pdf.ln(ch)
+            pdf.set_font("Arial", "", 8)
+            amt = meal_totals.get("BEEF BURRITO BOWL", 0)
+            for ing, qty in rows:
+                tot = (qty * amt) / 60 if amt else 0
+                pdf.set_x(x)
+                pdf.cell(col_w * 0.4, ch, ing, 1)
+                pdf.cell(col_w * 0.2, ch, str(qty), 1)
+                pdf.cell(col_w * 0.2, ch, str(amt), 1)
+                pdf.cell(col_w * 0.2, ch, str(round(tot, 2)), 1)
+                pdf.ln(ch)
+        elif title == "Parma Mix":
+            headers = [("Ingredient", 0.5), ("Qty", 0.25), ("Amt", 0.25)]
+            for h, w in headers:
+                pdf.cell(col_w * w, ch, h, 1)
+            pdf.ln(ch)
+            pdf.set_font("Arial", "", 8)
+            amt = meal_totals.get("NAKED CHICKEN PARMA", 0)
+            for ing, qty in rows:
+                pdf.set_x(x)
+                pdf.cell(col_w * 0.5, ch, ing, 1)
+                pdf.cell(col_w * 0.25, ch, str(qty), 1)
+                pdf.cell(col_w * 0.25, ch, str(amt), 1)
+                pdf.ln(ch)
+        col_y[col] = pdf.get_y() + pad
+    # Return max y for next section
+    return max(col_y)
