@@ -19,7 +19,7 @@ meal_recipes = {
                                 "sub_section":{"title":"Chickpea Recipe","ingredients":{"Onion":20,"Zucchini":30,"Red Capsicum":30,"Garlic":2,"Oil":2,"Chickpeas":115,"Mix Spices":1.7,"Chicken Stock":50}}}
 }
 
-def draw_recipes_section(pdf, meal_totals, xpos, col_w, ch, pad, bottom):
+def draw_section(pdf, meal_totals, xpos, col_w, ch, pad, bottom):
     pdf.add_page()
     pdf.set_font("Arial","B",14)
     pdf.cell(0,10,"Meal Recipes",ln=1,align='C')
