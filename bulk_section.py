@@ -10,7 +10,7 @@ bulk_sections = [
      "ingredients": {"Penne": 59, "Oil": 0.7},
      "meals": ["Chicken Pesto Pasta", "Chicken and Broccoli Pasta"]},
     {"title": "Rice Order", "batch_ingredient": "Rice", "batch_size": 180,
-     "ingredients": {"Rice": 60, "Oil": 0.7},
+     "ingredients": {"Rice": 60, "Water": 95, "Salt": 1, "Oil": 1.5},
      "meals": [
         "Beef Chow Mein",
         "Beef Burrito Bowl",
