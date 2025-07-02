@@ -10,6 +10,7 @@ from fridge_section import draw_fridge_section
 from chicken_mixing_section import draw_chicken_mixing_section
 from meat_veg_section import draw_meat_veg_section
 
+
 st.title("📦 Bulk Ingredient Summary Report")
 uploaded_file = st.file_uploader("Upload Production File (CSV or Excel)", type=["csv","xlsx"])
 if not uploaded_file:
@@ -52,11 +53,10 @@ pdf.set_y(last_y)
 last_y = draw_chicken_mixing_section(pdf, meal_totals, xpos, col_w, ch, pad, bottom, start_y=last_y)
 pdf.set_y(last_y)
 last_y = draw_meat_veg_section(
-    pdf, xpos, col_w, ch, pad, bottom, start_y=last_y,
-    meal_recipes=meal_recipes,
-    bulk_sections=bulk_sections
+    pdf, meal_totals, meal_recipes, bulk_sections, xpos, col_w, ch, pad, bottom, start_y=last_y
 )
 pdf.set_y(last_y)
+
 
 # Download
 fname = f"daily_production_report_{datetime.today().strftime('%d-%m-%Y')}.pdf"
