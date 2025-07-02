@@ -2,7 +2,7 @@ import math
 from fpdf import FPDF
 from datetime import datetime
 
-def draw_recipes_section(pdf, meal_totals, xpos, col_w, ch, pad, bottom, start_y):
+def draw_recipes_section(pdf, meal_totals, xpos, col_w, ch, pad, bottom, start_y=None):
     meal_recipes = {
         "Spaghetti Bolognese": {"batch":90, "ingredients":{"Beef Mince":100,"Napoli Sauce":65,"Crushed Tomatoes":45,"Beef Stock":30,"Onion":15,"Zucchini":15,"Carrot":15,"Vegetable Oil":1,"Salt":2,"Pepper":0.5,"Spaghetti":68}},
         "Beef Chow Mein":        {"batch":80, "ingredients":{"Beef Mince":120,"Celery":42,"Carrot":42,"Cabbage":42,"Onion":42,"Oil":2,"Pepper":0.8,"Soy Sauce":13,"Oyster Sauce":13,"Rice":130}},
@@ -21,62 +21,70 @@ def draw_recipes_section(pdf, meal_totals, xpos, col_w, ch, pad, bottom, start_y
         "Moroccan Chicken":       {"batch":0,  "ingredients":{"Chicken":180},
                                     "sub_section":{"title":"Chickpea Recipe","ingredients":{"Onion":20,"Zucchini":30,"Red Capsicum":30,"Garlic":2,"Oil":2,"Chickpeas":115,"Mix Spices":1.7,"Chicken Stock":50}}}
     }
-    pdf.set_xy(xpos[0], start_y)
+    pdf.add_page()
     pdf.set_font("Arial","B",14)
     pdf.cell(0,10,"Meal Recipes",ln=1,align='C')
     pdf.ln(5)
-
+    # Start columns
     heights = [pdf.get_y(), pdf.get_y()]
     col = 0
-    def next_pos(heights, col, block_h, title=None):
+    for name, data in meal_recipes.items():
+        main = len(data["ingredients"])
+        sub = len(data.get("sub_section",{}).get("ingredients",{}))
+        rows = 2 + main + (2 + sub if sub else 0)
+        block_h = rows * ch + pad
+        # Determine which column to use (shortest first)
+        col = 0 if heights[0] <= heights[1] else 1
+        # New page if needed
         if heights[col] + block_h > bottom:
-            col = 1 - col
-            if heights[col] + block_h > bottom:
-                pdf.add_page()
-                if title:
-                    pdf.set_font("Arial","B",14)
-                    pdf.cell(0,10,title,ln=1,align='C')
-                    pdf.ln(5)
-                heights = [pdf.get_y(), pdf.get_y()]
-        return heights, col
-
-    for name,data in meal_recipes.items():
-        rows = 2 + len(data["ingredients"]) + (2 + len(data["sub_section"]["ingredients"]) if "sub_section" in data else 0)
-        block_h = rows*ch + pad
-        heights, col = next_pos(heights, col, block_h, "Meal Recipes")
-        x,y = xpos[col], heights[col]
-        pdf.set_xy(x,y)
+            pdf.add_page()
+            pdf.set_font("Arial","B",14)
+            pdf.cell(0,10,"Meal Recipes (cont'd)",ln=1,align='C')
+            pdf.ln(5)
+            heights = [pdf.get_y(), pdf.get_y()]
+            col = 0
+        x, y = xpos[col], heights[col]
+        pdf.set_xy(x, y)
         pdf.set_font("Arial","B",11)
         pdf.set_fill_color(230,230,230)
-        pdf.cell(col_w,ch,name,ln=1,fill=True)
-        pdf.set_x(x); pdf.set_font("Arial","B",8)
+        pdf.cell(col_w, ch, name, ln=1, fill=True)
+        pdf.set_x(x)
+        pdf.set_font("Arial","B",8)
         for h,w in [("Ingredient",0.3),("Qty/Meal",0.15),("Meals",0.15),("Batch Total",0.25),("Batch",0.15)]:
-            pdf.cell(col_w*w,ch,h,1)
-        pdf.ln(ch); pdf.set_font("Arial","",8)
+            pdf.cell(col_w*w, ch, h, 1)
+        pdf.ln(ch)
+        pdf.set_font("Arial","",8)
         tot = meal_totals.get(name.upper(),0)
         batches = math.ceil(tot/data["batch"]) if data["batch"]>0 else 0
         for i,(ing,qty) in enumerate(data["ingredients"].items()):
             bt = round(qty*tot/batches) if batches else 0
             bl = str(batches) if i==0 else ""
             pdf.set_x(x)
-            pdf.cell(col_w*0.3,ch,ing[:20],1); pdf.cell(col_w*0.15,ch,str(qty),1)
-            pdf.cell(col_w*0.15,ch,str(tot),1); pdf.cell(col_w*0.25,ch,str(bt),1)
-            pdf.cell(col_w*0.15,ch,bl,1)
+            pdf.cell(col_w*0.3, ch, ing[:20], 1)
+            pdf.cell(col_w*0.15, ch, str(qty), 1)
+            pdf.cell(col_w*0.15, ch, str(tot), 1)
+            pdf.cell(col_w*0.25, ch, str(bt), 1)
+            pdf.cell(col_w*0.15, ch, bl, 1)
             pdf.ln(ch)
+        # Sub-section if exists
         if "sub_section" in data:
             sub = data["sub_section"]
             pdf.set_x(x); pdf.set_font("Arial","B",9)
-            pdf.cell(col_w,ch,sub["title"],ln=1)
+            pdf.cell(col_w, ch, sub["title"], ln=1)
             pdf.set_x(x); pdf.set_font("Arial","B",8)
             for h,w in [("Ingredient",0.3),("Qty/Meal",0.15),("Meals",0.15),("Total",0.25),("",0.15)]:
-                pdf.cell(col_w*w,ch,h,1)
+                pdf.cell(col_w*w, ch, h, 1)
             pdf.ln(ch); pdf.set_font("Arial","",8)
-            for ingr,per in sub["ingredients"].items():
+            for ingr, per in sub["ingredients"].items():
                 adj = round(per*tot/batches) if batches else round(per*tot,2)
                 pdf.set_x(x)
-                pdf.cell(col_w*0.3,ch,ingr[:20],1); pdf.cell(col_w*0.15,ch,str(per),1)
-                pdf.cell(col_w*0.15,ch,str(tot),1); pdf.cell(col_w*0.25,ch,str(adj),1)
-                pdf.cell(col_w*0.15,ch,"",1)
+                pdf.cell(col_w*0.3, ch, ingr[:20], 1)
+                pdf.cell(col_w*0.15, ch, str(per), 1)
+                pdf.cell(col_w*0.15, ch, str(tot), 1)
+                pdf.cell(col_w*0.25, ch, str(adj), 1)
+                pdf.cell(col_w*0.15, ch, "", 1)
                 pdf.ln(ch)
+        # Advance column height
         heights[col] = pdf.get_y() + pad
+    # Return the y for next section
     return max(heights)
