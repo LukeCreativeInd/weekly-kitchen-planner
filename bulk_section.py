@@ -1,4 +1,5 @@
 import math
+from datetime import datetime
 from fpdf import FPDF
 
 def draw_bulk_section(pdf, meal_totals, xpos, col_w, ch, pad, bottom):
