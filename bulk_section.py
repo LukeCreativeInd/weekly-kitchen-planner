@@ -27,7 +27,7 @@ bulk_sections = [
      "meals": ["Moroccan Chicken"]},
 
     {"title": "Chicken Thigh", "batch_ingredient": "Chicken Thigh", "batch_size": 0,
-     "ingredients": {"Chicken": 180, "Oil": 4, "Roast Chicken Mix": 4},
+     "ingredients": {"Chicken": 150, "Oil": 4, "Roast Chicken Mix": 4},
      "meals": ["Roasted Lemon Chicken & Potatoes", "Chicken Fajita Bowl"]},
    
     {"title": "Steak", "batch_ingredient": "Steak", "batch_size": 0,
