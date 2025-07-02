@@ -1,6 +1,5 @@
 import math
 from datetime import datetime
-from fpdf import FPDF
 
 def draw_bulk_section(pdf, meal_totals, xpos, col_w, ch, pad, bottom):
     bulk_sections = [
@@ -40,18 +39,21 @@ def draw_bulk_section(pdf, meal_totals, xpos, col_w, ch, pad, bottom):
 
     heights = [pdf.get_y(), pdf.get_y()]
     col = 0
+    def next_pos(heights, col, block_h, title=None):
+        if heights[col] + block_h > bottom:
+            col = 1 - col
+            if heights[col] + block_h > bottom:
+                pdf.add_page()
+                if title:
+                    pdf.set_font("Arial","B",14)
+                    pdf.cell(0,10,title,ln=1,align='C')
+                    pdf.ln(5)
+                heights = [pdf.get_y(), pdf.get_y()]
+        return heights, col
+
     for sec in bulk_sections:
         block_h = (len(sec['ingredients'])+2)*ch + pad
-        # Always pick the shorter column
-        col = 0 if heights[0] <= heights[1] else 1
-        if heights[col]+block_h > bottom:
-            # Start new page and reset heights
-            pdf.add_page()
-            pdf.set_font("Arial","B",14)
-            pdf.cell(0,10,title1,ln=1,align='C')
-            pdf.ln(5)
-            heights = [pdf.get_y(), pdf.get_y()]
-            col = 0
+        heights, col = next_pos(heights, col, block_h, title1)
         x, y = xpos[col], heights[col]
         pdf.set_xy(x,y)
         pdf.set_font("Arial","B",11)
@@ -75,6 +77,5 @@ def draw_bulk_section(pdf, meal_totals, xpos, col_w, ch, pad, bottom):
             pdf.cell(col_w*0.15,ch,lbl,1)
             pdf.ln(ch)
         heights[col] = pdf.get_y() + pad
-
-    # Return max height for starting next section
+    # Return the lowest Y so next section starts just below
     return max(heights)
