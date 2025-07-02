@@ -1,5 +1,3 @@
-import math
-
 def draw_meat_veg_section(pdf, meal_totals, meal_recipes, bulk_sections, xpos, col_w, ch, pad, bottom, start_y=None):
     y = start_y or pdf.get_y()
     pdf.set_y(y)
@@ -7,86 +5,79 @@ def draw_meat_veg_section(pdf, meal_totals, meal_recipes, bulk_sections, xpos, c
     pdf.cell(0, 10, "Meat Order and Veg Prep", ln=1, align="C")
     pdf.ln(2)
 
-    # --- MEAT ORDER ---
-    meat_rows = []
-
-    # CHUCK ROLL (LEBO)
-    stew = meal_recipes["Lebanese Beef Stew"]["ingredients"]
-    stew_qty = stew.get("Chuck Diced", 0)
-    stew_meals = meal_totals.get("LEBANESE BEEF STEW", 0)
-    chuck_roll_lebo = stew_qty * stew_meals
-    meat_rows.append(("CHUCK ROLL (LEBO)", chuck_roll_lebo))
-
-    # BEEF TOPSIDE (MONG)
-    mong = meal_recipes["Mongolian Beef"]["ingredients"]
-    mong_qty = mong.get("Chuck", 0)
-    mong_meals = meal_totals.get("MONGOLIAN BEEF", 0)
-    beef_topside_mong = mong_qty * mong_meals
-    meat_rows.append(("BEEF TOPSIDE (MONG)", beef_topside_mong))
-
-    # MINCE - add up for all relevant recipes
-    mince_total = 0
-    mince_recipes = [
-        ("Spaghetti Bolognese", "Beef Mince"),
-        ("Shepherd's Pie", "Beef Mince"),
-        ("Beef Chow Mein", "Beef Mince"),
-        ("Beef Burrito Bowl", "Beef Mince"),
-        ("Beef Meatballs", "Mince"),
-    ]
-    for recipe, ingredient in mince_recipes:
-        if recipe in meal_recipes:
-            rec = meal_recipes[recipe]
-            qty = rec["ingredients"].get(ingredient, 0)
-            meals = meal_totals.get(recipe.upper(), 0)
-            mince_total += qty * meals
-    meat_rows.append(("MINCE", mince_total))
-
-    # TOPSIDE STEAK (from Steak in bulk area)
-    steak_sec = next((s for s in bulk_sections if s["title"].lower().startswith("steak")), None)
-    if steak_sec:
-        steak_qty = steak_sec["ingredients"].get("Steak", 0)
-        steak_meals = sum(meal_totals.get(m.upper(), 0) for m in steak_sec["meals"])
-        topside_steak = steak_qty * steak_meals
-    else:
-        topside_steak = 0
-    meat_rows.append(("TOPSIDE STEAK", topside_steak))
-
-    # LAMB SHOULDER
-    lamb_sec = next((s for s in bulk_sections if s["title"].lower().startswith("lamb marinate")), None)
-    if lamb_sec:
-        lamb_qty = lamb_sec["ingredients"].get("Lamb Shoulder", 0)
-        lamb_meals = sum(meal_totals.get(m.upper(), 0) for m in lamb_sec["meals"])
-        lamb_shoulder = lamb_qty * lamb_meals
-    else:
-        lamb_shoulder = 0
-    meat_rows.append(("LAMB SHOULDER", lamb_shoulder))
-
-    # MOROCCAN CHICKEN
-    moro_sec = next((s for s in bulk_sections if s["title"].lower().startswith("moroccan chicken")), None)
-    if moro_sec:
-        moro_qty = moro_sec["ingredients"].get("Chicken", 0)
-        moro_meals = sum(meal_totals.get(m.upper(), 0) for m in moro_sec["meals"])
-        moro_chicken = moro_qty * moro_meals
-    else:
-        moro_chicken = 0
-    meat_rows.append(("MORROCAN CHICKEN", moro_chicken))
-
-    # Remaining three
-    meat_rows.append(("ITALIAN CHICKEN", 0))
-    meat_rows.append(("NORMAL CHICKEN", 0))
-    meat_rows.append(("CHICKEN THIGH", 0))
-
-    # Draw table
+    # --- Meat Order table ---
     pdf.set_font("Arial", "B", 11)
-    pdf.set_fill_color(230, 230, 230)
-    pdf.cell(col_w, ch, "Meat Type", 1, 0, "L", True)
-    pdf.cell(col_w, ch, "Amount", 1, 1, "L", True)
-    pdf.set_font("Arial", "", 10)
-    for mt, amt in meat_rows:
-        pdf.cell(col_w, ch, mt, 1)
-        pdf.cell(col_w, ch, str(amt), 1)
+    pdf.set_fill_color(230,230,230)
+    pdf.cell(col_w, ch, "Meat Order", ln=1, fill=True)
+    pdf.set_font("Arial", "B", 8)
+    pdf.cell(col_w*0.7, ch, "Meat Type", 1)
+    pdf.cell(col_w*0.3, ch, "Amount", 1)
+    pdf.ln(ch)
+    pdf.set_font("Arial", "", 8)
+
+    # --- Calculation Example (replace with your real logic as needed) ---
+    # The following assumes your meal_recipes and bulk_sections are passed in as params
+    # and that meal_totals is a dict keyed by UPPERCASE names.
+    def get_total_qty(meal, ingredient):
+        if meal in meal_recipes and ingredient in meal_recipes[meal]["ingredients"]:
+            qty_per_meal = meal_recipes[meal]["ingredients"][ingredient]
+            meal_amt = meal_totals.get(meal.upper(), 0)
+            return qty_per_meal * meal_amt
+        return 0
+
+    def get_bulk_total(section_title, ingredient):
+        for section in bulk_sections:
+            if section['title'] == section_title and ingredient in section["ingredients"]:
+                tot_meals = sum(meal_totals.get(m.upper(),0) for m in section["meals"])
+                return section["ingredients"][ingredient] * tot_meals
+        return 0
+
+    meat_order = [
+        ("CHUCK ROLL (LEBO)", get_total_qty("Lebanese Beef Stew", "Chuck Diced")),
+        ("BEEF TOPSIDE (MONG)", get_total_qty("Mongolian Beef", "Chuck")),
+        ("MINCE",
+            sum([
+                get_total_qty("Spaghetti Bolognese", "Beef Mince"),
+                get_total_qty("Shepherd's Pie", "Beef Mince"),
+                get_total_qty("Beef Chow Mein", "Beef Mince"),
+                get_total_qty("Beef Burrito Bowl", "Beef Mince"),
+                get_total_qty("Beef Meatballs", "Mince")
+            ])
+        ),
+        ("TOPSIDE STEAK", get_bulk_total("Steak", "Steak")),
+        ("LAMB SHOULDER", get_bulk_total("Lamb Marinate", "Lamb Shoulder")),
+        ("MORROCAN CHICKEN", get_bulk_total("Moroccan Chicken", "Chicken")),
+        ("ITALIAN CHICKEN", 0),
+        ("NORMAL CHICKEN", 0),
+        ("CHICKEN THIGH", 0),
+    ]
+
+    for name, amt in meat_order:
+        pdf.cell(col_w*0.7, ch, name, 1)
+        pdf.cell(col_w*0.3, ch, str(int(amt)), 1)
         pdf.ln(ch)
 
-    # (Veg prep table as per your previous logic...)
+    pdf.ln(5)
+    # --- Veg Prep table ---
+    pdf.set_font("Arial", "B", 11)
+    pdf.set_fill_color(230,230,230)
+    pdf.cell(col_w, ch, "Veg Prep", ln=1, fill=True)
+    pdf.set_font("Arial", "B", 8)
+    pdf.cell(col_w*0.7, ch, "Veg Prep", 1)
+    pdf.cell(col_w*0.3, ch, "Amount", 1)
+    pdf.ln(ch)
+    pdf.set_font("Arial", "", 8)
 
-    return pdf.get_y() + pad
+    veg_preps = [
+        "10MM DICED CARROT", "10MM DICED POTATO (LEBO)", "10MM DICED ZUCCHINI", "5MM DICED CABBAGE",
+        "5MM DICED CAPSICUM", "5MM DICED CARROTS", "5MM DICED CELERY", "5MM DICED MUSHROOMS",
+        "5MM DICED ONION", "5MM MONGOLIAN CAPSICUM", "5MM MONGOLIAN ONION", "5MM SLICED MUSHROOMS",
+        "BROCCOLI", "CRATED CARROTS", "CRATED ZUCCHINI", "LEMON POTATO", "ROASTED POTATO",
+        "THAI POTATOS", "POTATO MASH", "SWEET POTATO MASH", "SPINACH", "RED ONION", "PARSLEY"
+    ]
+    for name in veg_preps:
+        pdf.cell(col_w*0.7, ch, name, 1)
+        pdf.cell(col_w*0.3, ch, "0", 1)
+        pdf.ln(ch)
+    # Return Y for consistency
+    return pdf.get_y()
