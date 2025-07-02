@@ -18,8 +18,6 @@ meal_recipes = {
     "Thai Green Chicken Curry":{"batch":0,  "ingredients":{"Chicken":140,"Rice":130}},
     "Moroccan Chicken":       {"batch":0,  "ingredients":{"Chicken":180},
         "sub_section":{"title":"Chickpea Recipe","ingredients":{"Onion":20,"Zucchini":30,"Red Capsicum":30,"Garlic":2,"Oil":2,"Chickpeas":115,"Mix Spices":1.7,"Chicken Stock":50}}}
-    "Steak with Mushroom Sauce":{"batch":0,  "ingredients":{"Topside Steak":110},
-        "sub_section":{"title":"Steak On It's Own","ingredients":{"Topside Steak":200}}}
 }
 
 def draw_recipes_section(pdf, meal_totals, xpos, col_w, ch, pad, bottom, start_y=None):
