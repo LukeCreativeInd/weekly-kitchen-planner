@@ -1,10 +1,13 @@
-def draw_meat_veg_section(pdf, xpos, col_w, ch, pad, bottom, start_y):
-    pdf.set_xy(xpos[0], start_y)
-    pdf.set_font("Arial","B",14)
-    pdf.cell(0,10,"Meat Order and Veg Prep", ln=1, align='C')
+def draw_meat_veg_section(pdf, xpos, col_w, ch, pad, bottom, start_y=None):
+    # Always start on a new page
+    pdf.add_page()
+    left = xpos[0]
+    pdf.set_xy(left, 10)
+    pdf.set_font("Arial", "B", 14)
+    pdf.cell(0, 10, "Meat Order and Veg Prep", ln=1, align='C')
     pdf.ln(5)
 
-    # --- Meat Order Table (left column) ---
+    # Meat Order Table
     meat_types = [
         "CHUCK ROLL (LEBO)",
         "BEEF TOPSIDE (MONG)",
@@ -14,25 +17,27 @@ def draw_meat_veg_section(pdf, xpos, col_w, ch, pad, bottom, start_y):
         "MORROCAN CHICKEN",
         "ITALIAN CHICKEN",
         "NORMAL CHICKEN",
-        "CHICKEN THIGH"
+        "CHICKEN THIGH",
     ]
-    pdf.set_x(xpos[0])
-    pdf.set_font("Arial","B",11)
-    pdf.set_fill_color(230,230,230)
-    pdf.cell(col_w, ch, "Meat Order", ln=1, fill=True)
-    pdf.set_x(xpos[0]); pdf.set_font("Arial","B",8)
-    pdf.cell(col_w*0.7, ch, "Meat Type", 1)
-    pdf.cell(col_w*0.3, ch, "Amount", 1)
+    col1_x = xpos[0]
+    table_w = col_w * 0.7
+    pdf.set_x(col1_x)
+    pdf.set_font("Arial", "B", 11)
+    pdf.set_fill_color(230, 230, 230)
+    pdf.cell(table_w, ch, "Meat Order", ln=1, fill=True)
+    pdf.set_x(col1_x)
+    pdf.set_font("Arial", "B", 8)
+    pdf.cell(table_w * 0.7, ch, "Meat Type", 1)
+    pdf.cell(table_w * 0.3, ch, "Amount", 1)
     pdf.ln(ch)
-    pdf.set_font("Arial","",8)
+    pdf.set_font("Arial", "", 8)
     for meat in meat_types:
-        pdf.set_x(xpos[0])
-        pdf.cell(col_w*0.7, ch, meat, 1)
-        pdf.cell(col_w*0.3, ch, "0", 1)
+        pdf.set_x(col1_x)
+        pdf.cell(table_w * 0.7, ch, meat, 1)
+        pdf.cell(table_w * 0.3, ch, "0", 1)
         pdf.ln(ch)
-    col1_end = pdf.get_y()
 
-    # --- Veg Prep Table (right column) ---
+    # Veg Prep Table
     veg_types = [
         "10MM DICED CARROT",
         "10MM DICED POTATO (LEBO)",
@@ -56,22 +61,21 @@ def draw_meat_veg_section(pdf, xpos, col_w, ch, pad, bottom, start_y):
         "SWEET POTATO MASH",
         "SPINACH",
         "RED ONION",
-        "PARSLEY"
+        "PARSLEY",
     ]
-    pdf.set_xy(xpos[1], start_y + 0)  # Align with section title
-    pdf.set_font("Arial","B",11)
-    pdf.set_fill_color(230,230,230)
-    pdf.cell(col_w, ch, "Veg Prep", ln=1, fill=True)
-    pdf.set_x(xpos[1]); pdf.set_font("Arial","B",8)
-    pdf.cell(col_w*0.7, ch, "Veg Prep", 1)
-    pdf.cell(col_w*0.3, ch, "Amount", 1)
+    pdf.ln(5)
+    pdf.set_x(col1_x)
+    pdf.set_font("Arial", "B", 11)
+    pdf.set_fill_color(230, 230, 230)
+    pdf.cell(table_w, ch, "Veg Prep", ln=1, fill=True)
+    pdf.set_x(col1_x)
+    pdf.set_font("Arial", "B", 8)
+    pdf.cell(table_w * 0.7, ch, "Veg Prep", 1)
+    pdf.cell(table_w * 0.3, ch, "Amount", 1)
     pdf.ln(ch)
-    pdf.set_font("Arial","",8)
+    pdf.set_font("Arial", "", 8)
     for veg in veg_types:
-        pdf.set_x(xpos[1])
-        pdf.cell(col_w*0.7, ch, veg, 1)
-        pdf.cell(col_w*0.3, ch, "0", 1)
+        pdf.set_x(col1_x)
+        pdf.cell(table_w * 0.7, ch, veg, 1)
+        pdf.cell(table_w * 0.3, ch, "0", 1)
         pdf.ln(ch)
-    col2_end = pdf.get_y()
-
-    return max(col1_end, col2_end) + pad
