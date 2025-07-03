@@ -9,7 +9,7 @@ bulk_sections = [
     {"title": "Penne Order", "batch_ingredient": "Penne", "batch_size": 157,
      "ingredients": {"Penne": 59, "Oil": 0.7},
      "meals": ["Chicken Pesto Pasta", "Chicken and Broccoli Pasta"]},
-    {"title": "Rice Order", "batch_ingredient": "Rice", "batch_size": 180,
+    {"title": "Rice Order", "batch_ingredient": "Rice", "batch_size": 915,
      "ingredients": {"Rice": 60, "Water": 95, "Salt": 1, "Oil": 1.5},
      "meals": [
         "Beef Chow Mein",
@@ -46,11 +46,11 @@ bulk_sections = [
      "ingredients": {"Sweet Potato": 185, "Salt": 1, "White Pepper": 0.5},
      "meals": ["Shepherd's Pie", "Chicken with Sweet Potato and Beans"]},
    
-    {"title": "Roasted Potatoes", "batch_ingredient": "Roasted Potatoes", "batch_size": 60,
+    {"title": "Roasted Potatoes", "batch_ingredient": "Roasted Potatoes", "batch_size": 63,
      "ingredients": {"Roasted Potatoes": 190, "Oil": 1, "Spices Mix": 2.5},
      "meals": ["Naked Chicken Parma", "Lamb Souvlaki"]},
     
-    {"title": "Roasted Lemon Potatoes", "batch_ingredient": "Potatoes", "batch_size": 60,
+    {"title": "Roasted Lemon Potatoes", "batch_ingredient": "Potatoes", "batch_size": 63,
      "ingredients": {"Potatoes": 207, "Oil": 1, "Salt": 1.2},
      "meals": ["Roasted Lemon Chicken & Potatoes"]},
     
