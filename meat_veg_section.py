@@ -55,7 +55,8 @@ def draw_meat_veg_section(pdf, meal_totals, meal_recipes, bulk_sections, xpos, c
             recipe_total("Butter Chicken", "Chicken") +
             recipe_total("Chicken and Broccoli Pasta", "Chicken") +
             recipe_total("Thai Green Chicken Curry", "Chicken") +
-            bulk_total("Chicken Thigh", "Chicken")  # Chicken On It's Own is bulk?
+            recipe_total("Creamy Chicken & Mushroom Gnocchi", "Chicken")
+    
         )],
         ["CHICKEN THIGH", bulk_total("Chicken Thigh", "Chicken")],
     ]
