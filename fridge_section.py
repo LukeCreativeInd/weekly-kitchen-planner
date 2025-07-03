@@ -71,7 +71,7 @@ def draw_fridge_section(pdf, meal_totals, xpos, col_w, ch, pad, bottom, start_y=
     right_end_y = pdf.get_y()
 
     # Table 3: Parma Mix (place below the *lower* of the two tables above, in left col)
-   parma_start_y = max(left_end_y, right_end_y) + pad
+parma_start_y = max(left_end_y, right_end_y) + pad
 pdf.set_xy(left_x, parma_start_y)
 pdf.set_font("Arial", "B", 11)
 pdf.set_fill_color(230, 230, 230)
