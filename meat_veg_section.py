@@ -46,7 +46,7 @@ def draw_meat_veg_section(pdf, meal_totals, meal_recipes, bulk_sections, xpos, c
         # ITALIAN CHICKEN: Chicken With Vegetables, Chicken Sweet Potato and Beans, Naked Chicken Parma
         ["ITALIAN CHICKEN", (
             recipe_total("Chicken With Vegetables", "Chicken") +
-            recipe_total("Chicken Sweet Potato and Beans", "Chicken") +
+            recipe_total("Chicken with Sweet Potato and Beans", "Chicken") +
             recipe_total("Naked Chicken Parma", "Chicken")
         )],
         # NORMAL CHICKEN: Chicken Pesto Pasta, Butter Chicken, Chicken and Broccoli Pasta, Thai Green Chicken Curry, Chicken On It's Own
