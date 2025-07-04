@@ -60,11 +60,20 @@ def draw_meat_veg_section(
         ("LAMB SHOULDER", get_total_bulk_ingredient("Lamb Marinate", "Lamb Shoulder")),
         ("MORROCAN CHICKEN", get_total_bulk_ingredient("Moroccan Chicken", "Chicken")),
         ("ITALIAN CHICKEN", sum_totals_recipe_ingredients(
-            ["Chicken With Vegetables", "Chicken with Sweet Potato and Beans", "Naked Chicken Parma", "Chicken On Its Own"],
-            "Chicken", ingredient_override="Chicken")),  # use correct ingredient
+            [
+                "Chicken With Vegetables",
+                "Chicken with Sweet Potato and Beans",
+                "Naked Chicken Parma",
+                "Chicken On Its Own"
+            ], "Chicken")),
         ("NORMAL CHICKEN", sum_totals_recipe_ingredients(
-            ["Chicken Pesto Pasta", "Chicken and Broccoli Pasta", "Butter Chicken", "Thai Green Chicken Curry", "Creamy Chicken & Mushroom Gnocchi"],
-            "Chicken")),
+            [
+                "Chicken Pesto Pasta",
+                "Chicken and Broccoli Pasta",
+                "Butter Chicken",
+                "Thai Green Chicken Curry",
+                "Creamy Chicken & Mushroom Gnocchi"
+            ], "Chicken")),
         ("CHICKEN THIGH", get_total_bulk_ingredient("Chicken Thigh", "Chicken")),
     ]
 
@@ -133,16 +142,23 @@ def draw_meat_veg_section(
         ("10MM DICED POTATO (LEBO)", get_batch_total("Lebanese Beef Stew", "Potato")),
         ("10MM DICED ZUCCHINI", meal_recipes["Moroccan Chicken"]["sub_section"]["ingredients"].get("Zucchini", 0) * meal_totals.get("MOROCCAN CHICKEN".upper(), 0)),
         ("5MM DICED CABBAGE", get_batch_total("Beef Chow Mein", "Cabbage")),
-        ("5MM DICED CAPSICUM", get_batch_total("Shepherd's Pie", "Capsicum"), + get_batch_total("Beef Burrito Bowl", "Capsicum") + (
-        meal_recipes.get("Moroccan Chicken", {}).get("sub_section", {}).get("ingredients", {}).get("Red Capsicum", 0) * meal_totals.get("MOROCCAN CHICKEN".upper(), 0))),
+        ("5MM DICED CAPSICUM",
+            get_batch_total("Shepherd's Pie", "Capsicum")
+            + get_batch_total("Beef Burrito Bowl", "Capsicum")
+            + (
+                meal_recipes.get("Moroccan Chicken", {})
+                .get("sub_section", {})
+                .get("ingredients", {})
+                .get("Red Capsicum", 0)
+                * meal_totals.get("MOROCCAN CHICKEN".upper(), 0)
+            )
+        ),
         ("5MM DICED CARROTS", get_batch_total("Shepherd's Pie", "Carrots") + get_batch_total("Beef Burrito Bowl", "Carrot")),
         ("5MM DICED CELERY", get_batch_total("Beef Chow Mein", "Celery")),
         ("5MM DICED MUSHROOMS", get_batch_total("Shepherd's Pie", "Mushroom")),
-        # 5MM DICED ONION: Not specified, you can sum all onion batch totals here or leave blank
         ("5MM DICED ONION", 0),
         ("5MM MONGOLIAN CAPSICUM", get_batch_total("Mongolian Beef", "Capsicum")),
         ("5MM MONGOLIAN ONION", get_batch_total("Mongolian Beef", "Onion")),
-        # 5MM SLICED MUSHROOMS: Not specified, leave blank
         ("5MM SLICED MUSHROOMS", 0),
         ("BROCCOLI", get_batch_total("Chicken and Broccoli Pasta", "Broccoli")),
         ("CRATED CARROTS", get_batch_total("Spaghetti Bolognese", "Carrot")),  # Add Bean Nachos if you have recipe
