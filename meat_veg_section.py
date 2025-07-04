@@ -1,149 +1,109 @@
-def draw_meat_veg_section(pdf, meal_totals, meal_recipes, bulk_sections, xpos, col_w, ch, pad, bottom, start_y=None):
-    import math
+import math
 
-    # -- Always start this section on a new page --
-    pdf.add_page()
+def draw_meat_veg_section(
+    pdf, meal_totals, meal_recipes, bulk_sections, xpos, col_w, ch, pad, bottom, start_y=None
+):
+    # Helper to get meal total times quantity per meal
+    def total_ingredient(meal, ingredient, qty_override=None):
+        meals = meal_totals.get(meal.upper(), 0)
+        qty = qty_override if qty_override is not None else meal_recipes.get(meal, {}).get('ingredients', {}).get(ingredient, 0)
+        return meals * qty
+
+    # Calculate all meat values
+    meat_order = [
+        ("CHUCK ROLL (LEBO)", total_ingredient("Lebanese Beef Stew", "Chuck Diced")),
+        ("BEEF TOPSIDE (MONG)", total_ingredient("Mongolian Beef", "Chuck")),
+        ("MINCE", sum([
+            total_ingredient("Spaghetti Bolognese", "Beef Mince"),
+            total_ingredient("Shepherd's Pie", "Beef Mince"),
+            total_ingredient("Beef Chow Mein", "Beef Mince"),
+            total_ingredient("Beef Burrito Bowl", "Beef Mince"),
+            total_ingredient("Beef Meatballs", "Mince")
+        ])),
+        ("TOPSIDE STEAK", sum([
+            total_ingredient("Steak with Mushroom Sauce", "Topside Steak"),
+            total_ingredient("Steak On Its Own", "Topside Steak")
+        ])),
+        ("LAMB SHOULDER", sum([
+            s['ingredients']['Lamb Shoulder'] * meal_totals.get(m.upper(), 0)
+            for s in bulk_sections if s['title'] == "Lamb Marinate"
+            for m in s['meals']
+        ])),
+        ("MORROCAN CHICKEN", sum([
+            s['ingredients']['Chicken'] * meal_totals.get(m.upper(), 0)
+            for s in bulk_sections if s['title'] == "Moroccan Chicken"
+            for m in s['meals']
+        ])),
+        ("ITALIAN CHICKEN", sum([
+            total_ingredient("Chicken with Vegetables", "Chicken", 153),
+            total_ingredient("Chicken with Sweet Potato and Beans", "Chicken", 153),
+            total_ingredient("Naked Chicken Parma", "Chicken", 153),
+            total_ingredient("Chicken On Its Own", "Chicken Breast", 153)  # adjust if needed
+        ])),
+        ("NORMAL CHICKEN", sum([
+            total_ingredient("Chicken Pesto Pasta", "Chicken", 130),
+            total_ingredient("Chicken and Broccoli Pasta", "Chicken", 130),
+            total_ingredient("Butter Chicken", "Chicken", 130),
+            total_ingredient("Thai Green Chicken Curry", "Chicken", 130),
+            total_ingredient("Creamy Chicken & Mushroom Gnocchi", "Chicken", 130)
+        ])),
+        ("CHICKEN THIGH", sum([
+            s['ingredients']['Chicken'] * meal_totals.get(m.upper(), 0)
+            for s in bulk_sections if s['title'] == "Chicken Thigh"
+            for m in s['meals']
+        ]) if any(s['title'] == "Chicken Thigh" for s in bulk_sections) else 0)
+    ]
+
+    # Start at new page if too close to bottom
+    if start_y is not None:
+        if start_y + (len(meat_order) + 8) * ch > bottom:
+            pdf.add_page()
+            y = pdf.get_y()
+        else:
+            y = start_y
+    else:
+        y = pdf.get_y()
+
+    pdf.set_y(y)
     pdf.set_font("Arial", "B", 14)
     pdf.cell(0, 10, "Meat Order and Veg Prep", ln=1, align="C")
     pdf.ln(2)
-    y = pdf.get_y()
-    x = xpos[0]
 
-    # ---- MEAT ORDER ----
-    pdf.set_xy(x, y)
+    # --- Meat Order Table ---
     pdf.set_font("Arial", "B", 11)
     pdf.set_fill_color(230, 230, 230)
     pdf.cell(col_w, ch, "Meat Order", ln=1, fill=True)
-    pdf.set_x(x)
     pdf.set_font("Arial", "B", 8)
-    pdf.cell(col_w * 0.65, ch, "Meat Type", 1)
-    pdf.cell(col_w * 0.35, ch, "Amount (g)", 1)
+    pdf.cell(col_w * 0.7, ch, "Meat Type", 1)
+    pdf.cell(col_w * 0.3, ch, "Amount (g)", 1)
     pdf.ln(ch)
     pdf.set_font("Arial", "", 8)
+    for meat, amt in meat_order:
+        pdf.cell(col_w * 0.7, ch, meat, 1)
+        pdf.cell(col_w * 0.3, ch, f"{int(amt):,}" if amt else "0", 1)
+        pdf.ln(ch)
 
-    # Compute meat values
-    # Italian Chicken calculation matches: Chicken with Vegetables, Chicken with Sweet Potato and Beans, Naked Chicken Parma, Chicken On Its Own
-    it_chicken_meals = 0
-    for meal in [
-        "Chicken With Vegetables", "Chicken with Sweet Potato and Beans", "Naked Chicken Parma", "Chicken On Its Own"
-    ]:
-        it_chicken_meals += meal_totals.get(meal.upper(), 0)
-    it_chicken_total = it_chicken_meals * 153
+    pdf.ln(4)
 
-    # Normal Chicken: Chicken Pesto Pasta, Chicken and Broccoli Pasta, Butter Chicken, Thai Green Chicken Curry, Creamy Chicken & Mushroom Gnocchi
-    normal_chicken_meals = 0
-    for meal in [
-        "Chicken Pesto Pasta", "Chicken and Broccoli Pasta", "Butter Chicken", "Thai Green Chicken Curry", "Creamy Chicken & Mushroom Gnocchi"
-    ]:
-        normal_chicken_meals += meal_totals.get(meal.upper(), 0)
-    normal_chicken_total = normal_chicken_meals * 130
-
-    # Chicken Thigh: Use total from Chicken Thigh table in bulk_sections
-    chicken_thigh_total = 0
-    for b in bulk_sections:
-        if b["title"] == "Chicken Thigh":
-            chicken_thigh_total = b["ingredients"]["Chicken"] * meal_totals.get("CHICKEN THIGH", 0)
-
-    # Now all other meats, pulling totals from recipes or bulk as required:
-    chuck_lebo = 0
-    beef_topside_mong = 0
-    mince_total = 0
-    topside_steak = 0
-    lamb_shoulder = 0
-    moroccan_chicken = 0
-    # Helper for recipes table lookups
-    def get_recipe_total(meal, ingr):
-        # For 'Beef Mince' or 'Chicken', etc.
-        recipe = meal_recipes.get(meal)
-        if not recipe: return 0
-        qty = recipe["ingredients"].get(ingr, 0)
-        count = meal_totals.get(meal.upper(), 0)
-        return qty * count
-
-    # 1. Chuck Roll (Lebo)
-    chuck_lebo = get_recipe_total("Lebanese Beef Stew", "Chuck Diced")
-    # 2. Beef Topside (Mong)
-    beef_topside_mong = get_recipe_total("Mongolian Beef", "Chuck")
-    # 3. Mince: Spag, Shep Pie, Chow Mein, Burrito Bowl, Meatballs
-    mince_total = (
-        get_recipe_total("Spaghetti Bolognese", "Beef Mince") +
-        get_recipe_total("Shepherd's Pie", "Beef Mince") +
-        get_recipe_total("Beef Chow Mein", "Beef Mince") +
-        get_recipe_total("Beef Burrito Bowl", "Beef Mince") +
-        get_recipe_total("Beef Meatballs", "Mince")
-    )
-    # 4. Topside Steak: 'Steak' row from Steak in bulk_sections
-    for b in bulk_sections:
-        if b["title"] == "Steak":
-            topside_steak = b["ingredients"]["Steak"] * meal_totals.get("STEAK WITH MUSHROOM SAUCE", 0)
-    # 5. Lamb Shoulder
-    for b in bulk_sections:
-        if b["title"] == "Lamb Marinate":
-            lamb_shoulder = b["ingredients"]["Lamb Shoulder"] * meal_totals.get("LAMB SOUVLAKI", 0)
-    # 6. Moroccan Chicken: 'Chicken' from Moroccan Chicken in bulk_sections
-    for b in bulk_sections:
-        if b["title"] == "Moroccan Chicken":
-            moroccan_chicken = b["ingredients"]["Chicken"] * meal_totals.get("MOROCCAN CHICKEN", 0)
-
-    # Write table rows
-    meat_rows = [
-        ("CHUCK ROLL (LEBO)", chuck_lebo),
-        ("BEEF TOPSIDE (MONG)", beef_topside_mong),
-        ("MINCE", mince_total),
-        ("TOPSIDE STEAK", topside_steak),
-        ("LAMB SHOULDER", lamb_shoulder),
-        ("MORROCAN CHICKEN", moroccan_chicken),
-        ("ITALIAN CHICKEN", it_chicken_total),
-        ("NORMAL CHICKEN", normal_chicken_total),
-        ("CHICKEN THIGH", chicken_thigh_total),
+    # --- Veg Prep Table ---
+    veg_preps = [
+        "10MM DICED CARROT", "10MM DICED POTATO (LEBO)", "10MM DICED ZUCCHINI", "5MM DICED CABBAGE",
+        "5MM DICED CAPSICUM", "5MM DICED CARROTS", "5MM DICED CELERY", "5MM DICED MUSHROOMS",
+        "5MM DICED ONION", "5MM MONGOLIAN CAPSICUM", "5MM MONGOLIAN ONION", "5MM SLICED MUSHROOMS",
+        "BROCCOLI", "CRATED CARROTS", "CRATED ZUCCHINI", "LEMON POTATO", "ROASTED POTATO",
+        "THAI POTATOS", "POTATO MASH", "SWEET POTATO MASH", "SPINACH", "RED ONION", "PARSLEY"
     ]
-    for meat, amt in meat_rows:
-        pdf.set_x(x)
-        pdf.cell(col_w * 0.65, ch, meat, 1)
-        pdf.cell(col_w * 0.35, ch, f"{int(round(amt,0)):,}", 1, ln=1)
-
-    # --- Veg Prep (right column) ---
-    veg_types = [
-        "10MM DICED CARROT",
-        "10MM DICED POTATO (LEBO)",
-        "10MM DICED ZUCCHINI",
-        "5MM DICED CABBAGE",
-        "5MM DICED CAPSICUM",
-        "5MM DICED CARROTS",
-        "5MM DICED CELERY",
-        "5MM DICED MUSHROOMS",
-        "5MM DICED ONION",
-        "5MM MONGOLIAN CAPSICUM",
-        "5MM MONGOLIAN ONION",
-        "5MM SLICED MUSHROOMS",
-        "BROCCOLI",
-        "CRATED CARROTS",
-        "CRATED ZUCCHINI",
-        "LEMON POTATO",
-        "ROASTED POTATO",
-        "THAI POTATOS",
-        "POTATO MASH",
-        "SWEET POTATO MASH",
-        "SPINACH",
-        "RED ONION",
-        "PARSLEY",
-    ]
-    right_x = xpos[1]
-    y_after_meat = pdf.get_y() + 5
-    pdf.set_xy(right_x, y + ch)  # Level up with "Meat Order"
     pdf.set_font("Arial", "B", 11)
     pdf.set_fill_color(230, 230, 230)
     pdf.cell(col_w, ch, "Veg Prep", ln=1, fill=True)
-    pdf.set_x(right_x)
     pdf.set_font("Arial", "B", 8)
-    pdf.cell(col_w * 0.65, ch, "Veg Prep", 1)
-    pdf.cell(col_w * 0.35, ch, "Amount (g)", 1)
+    pdf.cell(col_w * 0.7, ch, "Veg Prep", 1)
+    pdf.cell(col_w * 0.3, ch, "Amount (g)", 1)
     pdf.ln(ch)
     pdf.set_font("Arial", "", 8)
-    for veg in veg_types:
-        pdf.set_x(right_x)
-        pdf.cell(col_w * 0.65, ch, veg, 1)
-        pdf.cell(col_w * 0.35, ch, "0", 1, ln=1)
+    for veg in veg_preps:
+        pdf.cell(col_w * 0.7, ch, veg, 1)
+        pdf.cell(col_w * 0.3, ch, "0", 1)
+        pdf.ln(ch)
 
-    # Return lowest Y for downstream (in case more sections are ever added)
-    return max(pdf.get_y(), y_after_meat + len(veg_types) * ch)
+    return pdf.get_y() + pad
