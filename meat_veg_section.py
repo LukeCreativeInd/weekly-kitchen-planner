@@ -19,7 +19,6 @@ def draw_meat_veg_section(pdf, meal_totals, meal_recipes, bulk_sections, xpos, c
         for sec in bulk_sections:
             if sec["title"].upper() == section_title.upper():
                 meals = 0
-                # For bulk_sections, use sum(meal_totals[m.upper()] for m in sec['meals'])
                 if "meals" in sec and len(sec["meals"]) > 0:
                     meals = sum(meal_totals.get(m.upper(), 0) for m in sec["meals"])
                 if ingredient in sec["ingredients"]:
@@ -29,6 +28,26 @@ def draw_meat_veg_section(pdf, meal_totals, meal_recipes, bulk_sections, xpos, c
                     else:
                         return qty_per_meal
         return 0
+
+    # --- Special calculations for Italian Chicken and Normal Chicken ---
+    # Meals for Italian Chicken
+    italian_chicken_meals = (
+        meal_totals.get("CHICKEN WITH VEGETABLES", 0)
+        + meal_totals.get("CHICKEN SWEET POTATO AND BEANS", 0)
+        + meal_totals.get("NAKED CHICKEN PARMA", 0)
+        + meal_totals.get("CHICKEN ON ITS OWN", 0)
+    )
+    italian_chicken_total = italian_chicken_meals * 153  # 153g per meal
+
+    # Meals for Normal Chicken
+    normal_chicken_meals = (
+        meal_totals.get("CHICKEN PESTO PASTA", 0)
+        + meal_totals.get("CHICKEN AND BROCCOLI PASTA", 0)
+        + meal_totals.get("BUTTER CHICKEN", 0)
+        + meal_totals.get("THAI GREEN CHICKEN CURRY", 0)
+        + meal_totals.get("CREAMY CHICKEN & MUSHROOM GNOCCHI", 0)
+    )
+    normal_chicken_total = normal_chicken_meals * 130  # 130g per meal
 
     meat_rows = [
         ["CHUCK ROLL (LEBO)", recipe_total("Lebanese Beef Stew", "Chuck Diced")],
@@ -43,21 +62,8 @@ def draw_meat_veg_section(pdf, meal_totals, meal_recipes, bulk_sections, xpos, c
         ["TOPSIDE STEAK", bulk_total("Steak", "Steak")],
         ["LAMB SHOULDER", bulk_total("Lamb Marinate", "Lamb Shoulder")],
         ["MORROCAN CHICKEN", bulk_total("Moroccan Chicken", "Chicken")],
-        # ITALIAN CHICKEN: Chicken With Vegetables, Chicken Sweet Potato and Beans, Naked Chicken Parma
-        ["ITALIAN CHICKEN", (
-            recipe_total("Chicken With Vegetables", "Chicken") +
-            recipe_total("Chicken with Sweet Potato and Beans", "Chicken") +
-            recipe_total("Naked Chicken Parma", "Chicken")
-        )],
-        # NORMAL CHICKEN: Chicken Pesto Pasta, Butter Chicken, Chicken and Broccoli Pasta, Thai Green Chicken Curry, Chicken On It's Own
-        ["NORMAL CHICKEN", (
-            recipe_total("Chicken Pesto Pasta", "Chicken") +
-            recipe_total("Butter Chicken", "Chicken") +
-            recipe_total("Chicken and Broccoli Pasta", "Chicken") +
-            recipe_total("Thai Green Chicken Curry", "Chicken") +
-            recipe_total("Creamy Chicken & Mushroom Gnocchi", "Chicken")
-    
-        )],
+        ["ITALIAN CHICKEN", italian_chicken_total],
+        ["NORMAL CHICKEN", normal_chicken_total],
         ["CHICKEN THIGH", bulk_total("Chicken Thigh", "Chicken")],
     ]
 
@@ -77,7 +83,7 @@ def draw_meat_veg_section(pdf, meal_totals, meal_recipes, bulk_sections, xpos, c
 
     pdf.ln(4)
 
-    # --- Veg Prep Table ---
+    # --- Veg Prep Table (unchanged) ---
     veg_rows = [
         "10MM DICED CARROT",
         "10MM DICED POTATO (LEBO)",
