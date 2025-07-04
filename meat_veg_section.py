@@ -133,7 +133,8 @@ def draw_meat_veg_section(
         ("10MM DICED POTATO (LEBO)", get_batch_total("Lebanese Beef Stew", "Potato")),
         ("10MM DICED ZUCCHINI", meal_recipes["Moroccan Chicken"]["sub_section"]["ingredients"].get("Zucchini", 0) * meal_totals.get("MOROCCAN CHICKEN".upper(), 0)),
         ("5MM DICED CABBAGE", get_batch_total("Beef Chow Mein", "Cabbage")),
-        ("5MM DICED CAPSICUM", get_batch_total("Shepherd's Pie", "Capsicum") + get_batch_total("Beef Burrito Bowl", "Capsicum")),
+        ("5MM DICED CAPSICUM", get_batch_total("Shepherd's Pie", "Capsicum"), + get_batch_total("Beef Burrito Bowl", "Capsicum") + (
+        meal_recipes.get("Moroccan Chicken", {}).get("sub_section", {}).get("ingredients", {}).get("Red Capsicum", 0) * meal_totals.get("MOROCCAN CHICKEN".upper(), 0))),
         ("5MM DICED CARROTS", get_batch_total("Shepherd's Pie", "Carrots") + get_batch_total("Beef Burrito Bowl", "Carrot")),
         ("5MM DICED CELERY", get_batch_total("Beef Chow Mein", "Celery")),
         ("5MM DICED MUSHROOMS", get_batch_total("Shepherd's Pie", "Mushroom")),
