@@ -51,8 +51,7 @@ pdf.set_y(last_y)
 # --- Here is the key change: start on a new page for meat/veg to prevent overlap! ---
 pdf.add_page()
 last_y = draw_meat_veg_section(
-    pdf, meal_totals, meal_recipes, bulk_sections,
-    xpos, col_w, ch, pad, bottom, start_y=10
+    pdf, meal_totals, meal_recipes, bulk_sections, xpos, col_w, ch, pad, bottom, start_y=last_y
 )
 pdf.set_y(last_y)
 
