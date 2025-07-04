@@ -1,161 +1,166 @@
 import math
 
-def draw_meat_veg_section(pdf, meal_totals, meal_recipes, bulk_sections, xpos, col_w, ch, pad, bottom, start_y=None):
-    
+def draw_meat_veg_section(
+    pdf, meal_totals, meal_recipes, bulk_sections, xpos, col_w, ch, pad, bottom, start_y=None
+):
+    # Prepare Y
     y = start_y or pdf.get_y()
     pdf.set_y(y)
     pdf.set_font("Arial", "B", 14)
     pdf.cell(0, 10, "Meat Order and Veg Prep", ln=1, align="C")
     pdf.ln(2)
 
-    left_x, right_x = xpos
-    curr_y = pdf.get_y()
-
-    # --- MEAT ORDER LOGIC ---
-    def get_total_from_recipe(recipe_name, ing, default_batch=None):
-        rec = meal_recipes.get(recipe_name)
-        if not rec: return 0
-        qty_per_meal = rec["ingredients"].get(ing, 0)
-        tot_meals = meal_totals.get(recipe_name.upper(), 0)
-        batch = rec.get("batch", 0) if rec.get("batch", 0) > 0 else default_batch or 1
-        return qty_per_meal * tot_meals
-
-    def get_total_from_bulk(title, ing):
-        for section in bulk_sections:
-            if section["title"] == title:
-                qty_per_meal = section["ingredients"].get(ing, 0)
-                tot_meals = sum(meal_totals.get(m.upper(),0) for m in section["meals"])
-                batch_size = section.get("batch_size", 0)
-                batches = math.ceil(tot_meals / batch_size) if batch_size > 0 else 1
-                return qty_per_meal * tot_meals
-        return 0
-
-    def get_total_from_chicken_mixing(mix_name, ing):
-        mix = chicken_mixing_data.get(mix_name)
-        if not mix: return 0
-        qty_per_meal = dict(mix["ingredients"]).get(ing, 0)
-        tot_meals = meal_totals.get(mix["meal"], 0)
-        divisor = mix.get("divisor", 1)
-        raw_b = math.ceil(tot_meals / divisor) if divisor > 0 else 1
-        batches = raw_b + (raw_b % 2)
-        return qty_per_meal * tot_meals if batches else 0
-
-    meat_types = [
-        ("CHUCK ROLL (LEBO)", get_total_from_recipe("Lebanese Beef Stew", "Chuck Diced")),
-        ("BEEF TOPSIDE (MONG)", get_total_from_recipe("Mongolian Beef", "Chuck")),
-        ("MINCE",
-         sum(get_total_from_recipe(name, "Beef Mince")
-             for name in ["Spaghetti Bolognese", "Shepherd's Pie", "Beef Chow Mein", "Beef Burrito Bowl"]) +
-         get_total_from_recipe("Beef Meatballs", "Mince")
-        ),
-        ("TOPSIDE STEAK", get_total_from_bulk("Steak", "Steak")),
-        ("LAMB SHOULDER", get_total_from_bulk("Lamb Marinate", "Lamb Shoulder")),
-        ("MORROCAN CHICKEN", get_total_from_bulk("Moroccan Chicken", "Chicken")),
-        # ITALIAN CHICKEN: Chicken With Vegetables, Chicken with Sweet Potato and Beans, Naked Chicken Parma, Chicken On Its Own
-        ("ITALIAN CHICKEN", sum(get_total_from_recipe(n, "Chicken")
-            for n in ["Chicken With Vegetables", "Chicken with Sweet Potato and Beans", "Naked Chicken Parma", "Chicken On Its Own"]
-        )),
-        # NORMAL CHICKEN: Chicken Pesto Pasta, Butter Chicken, Chicken and Broccoli Pasta, Thai Green Chicken Curry, Creamy Chicken & Mushroom Gnocchi
-        ("NORMAL CHICKEN", sum(get_total_from_recipe(n, "Chicken")
-            for n in ["Chicken Pesto Pasta", "Butter Chicken", "Chicken and Broccoli Pasta", "Thai Green Chicken Curry", "Creamy Chicken & Mushroom Gnocchi"]
-        )),
-        # CHICKEN THIGH: Chicken row from Chicken Thigh (assumed to be bulk section title)
-        ("CHICKEN THIGH", get_total_from_bulk("Chicken Thigh", "Chicken"))
-    ]
-
+    # 1. Meat Order
     pdf.set_font("Arial", "B", 11)
     pdf.set_fill_color(230, 230, 230)
-    pdf.set_xy(left_x, curr_y)
     pdf.cell(col_w, ch, "Meat Order", ln=1, fill=True)
-    pdf.set_x(left_x)
     pdf.set_font("Arial", "B", 8)
-    for h, w in [("Meat Type", 0.65), ("Amount", 0.35)]:
+    for h, w in [("Meat Type", 0.6), ("Amount (g)", 0.4)]:
         pdf.cell(col_w * w, ch, h, 1)
     pdf.ln(ch)
     pdf.set_font("Arial", "", 8)
-    for name, val in meat_types:
-        pdf.set_x(left_x)
-        pdf.cell(col_w * 0.65, ch, name, 1)
-        pdf.cell(col_w * 0.35, ch, str(int(val) if val else 0), 1)
-        pdf.ln(ch)
-    left_end_y = pdf.get_y()
 
-    # --- VEG PREP LOGIC ---
-    def get_batch_total(recipe_name, ing, from_subsection=False):
-        rec = meal_recipes.get(recipe_name)
-        if not rec:
-            return 0
-        tot_meals = meal_totals.get(recipe_name.upper(), 0)
-        batch = rec.get("batch", 0)
-        # If batch==0 treat as single batch
-        if not from_subsection:
-            qty_per_meal = rec["ingredients"].get(ing, 0)
-        else:
-            qty_per_meal = rec["sub_section"]["ingredients"].get(ing, 0) if "sub_section" in rec else 0
-        if batch > 0:
-            batches = math.ceil(tot_meals / batch)
-            batch_total = qty_per_meal * tot_meals / batch
-            return batch_total * batches
-        else:
-            return qty_per_meal * tot_meals
+    # Helper functions
+    def get_total_recipe_ingredient(recipe, ingredient):
+        data = meal_recipes.get(recipe, {})
+        meals = meal_totals.get(recipe.upper(), 0)
+        qty = data.get("ingredients", {}).get(ingredient, 0)
+        return qty * meals
 
-    def get_batch_total_bulk(title, ing):
-        for section in bulk_sections:
-            if section["title"] == title:
-                qty_per_meal = section["ingredients"].get(ing, 0)
-                tot_meals = sum(meal_totals.get(m.upper(), 0) for m in section["meals"])
-                batch_size = section.get("batch_size", 0)
-                if batch_size > 0:
-                    batches = math.ceil(tot_meals / batch_size)
-                    batch_total = qty_per_meal * tot_meals / batch_size
-                    return batch_total * batches
-                else:
-                    return qty_per_meal * tot_meals
+    def get_total_bulk_ingredient(bulk_title, ingredient):
+        section = next((b for b in bulk_sections if b['title'] == bulk_title), None)
+        if section:
+            total_meals = sum(meal_totals.get(m.upper(), 0) for m in section['meals'])
+            qty = section['ingredients'].get(ingredient, 0)
+            batches = math.ceil(total_meals / section['batch_size']) if section['batch_size'] > 0 else 0
+            if batches > 1:
+                return round(qty * total_meals)
+            else:
+                return round(qty * total_meals)
         return 0
 
+    def sum_totals_recipe_ingredients(recipe_list, ingredient, ingredient_override=None):
+        total = 0
+        for rec in recipe_list:
+            data = meal_recipes.get(rec, {})
+            meals = meal_totals.get(rec.upper(), 0)
+            ing = ingredient_override if ingredient_override else ingredient
+            qty = data.get("ingredients", {}).get(ing, 0)
+            total += qty * meals
+        return total
+
+    # Meat order calculations
+    meat_order = [
+        ("CHUCK ROLL (LEBO)", get_total_recipe_ingredient("Lebanese Beef Stew", "Chuck Diced")),
+        ("BEEF TOPSIDE (MONG)", get_total_recipe_ingredient("Mongolian Beef", "Chuck")),
+        ("MINCE", sum_totals_recipe_ingredients(
+            ["Spaghetti Bolognese", "Shepherd's Pie", "Beef Chow Mein", "Beef Burrito Bowl", "Beef Meatballs"],
+            "Beef Mince")),
+        ("TOPSIDE STEAK", get_total_bulk_ingredient("Steak", "Steak")),
+        ("LAMB SHOULDER", get_total_bulk_ingredient("Lamb Marinate", "Lamb Shoulder")),
+        ("MORROCAN CHICKEN", get_total_bulk_ingredient("Moroccan Chicken", "Chicken")),
+        ("ITALIAN CHICKEN", sum_totals_recipe_ingredients(
+            ["Chicken With Vegetables", "Chicken with Sweet Potato and Beans", "Naked Chicken Parma", "Chicken On Its Own"],
+            "Chicken", ingredient_override="Chicken")),  # use correct ingredient
+        ("NORMAL CHICKEN", sum_totals_recipe_ingredients(
+            ["Chicken Pesto Pasta", "Chicken and Broccoli Pasta", "Butter Chicken", "Thai Green Chicken Curry", "Creamy Chicken & Mushroom Gnocchi"],
+            "Chicken")),
+        ("CHICKEN THIGH", get_total_bulk_ingredient("Chicken Thigh", "Chicken")),
+    ]
+
+    for mtype, amt in meat_order:
+        pdf.cell(col_w * 0.6, ch, mtype, 1)
+        pdf.cell(col_w * 0.4, ch, str(int(round(amt))), 1)
+        pdf.ln(ch)
+
+    pdf.ln(6)
+
+    # 2. Veg Prep
+    pdf.set_font("Arial", "B", 11)
+    pdf.set_fill_color(230, 230, 230)
+    pdf.cell(col_w, ch, "Veg Prep", ln=1, fill=True)
+    pdf.set_font("Arial", "B", 8)
+    for h, w in [("Veg Prep", 0.7), ("Amount (g)", 0.3)]:
+        pdf.cell(col_w * w, ch, h, 1)
+    pdf.ln(ch)
+    pdf.set_font("Arial", "", 8)
+
+    # Helper: get batch total from meal recipe table
+    def get_batch_total(recipe, ingredient):
+        data = meal_recipes.get(recipe, {})
+        meals = meal_totals.get(recipe.upper(), 0)
+        qty = data.get("ingredients", {}).get(ingredient, 0)
+        batch = data.get("batch", 0)
+        batches = math.ceil(meals / batch) if batch > 0 else 1
+        total = qty * meals
+        # For these calculations, do qty * meals, and if more than 1 batch, times batch total by batches
+        batch_total = (qty * meals) // batches if batches > 1 else total
+        if batches > 1:
+            return batch_total * batches
+        return total
+
+    # Helper: get total from bulk section
+    def get_bulk_total(bulk_title, ingredient):
+        section = next((b for b in bulk_sections if b['title'] == bulk_title), None)
+        if section:
+            total_meals = sum(meal_totals.get(m.upper(), 0) for m in section['meals'])
+            qty = section['ingredients'].get(ingredient, 0)
+            batch_size = section.get("batch_size", 0)
+            batches = math.ceil(total_meals / batch_size) if batch_size > 0 else 1
+            total = qty * total_meals
+            batch_total = (qty * total_meals) // batches if batches > 1 else total
+            if batches > 1:
+                return batch_total * batches
+            return total
+        return 0
+
+    # For Gnocchi Spinach, mimic chicken mixing section
+    def get_total_from_chicken_mixing():
+        # Gnocchi: Spinach 25g x meals ordered
+        meals = meal_totals.get("CREAMY CHICKEN & MUSHROOM GNOCCHI".upper(), 0)
+        qty = 25
+        divisor = 36
+        raw_b = math.ceil(meals / divisor) if divisor > 0 else 0
+        batches = raw_b + (raw_b % 2) if raw_b > 0 else 0
+        total = (qty * meals) // batches if batches else qty * meals
+        if batches > 1:
+            return total * batches
+        return qty * meals
+
+    # Now build veg prep table rows
     veg_prep = [
         ("10MM DICED CARROT", get_batch_total("Lebanese Beef Stew", "Carrot")),
         ("10MM DICED POTATO (LEBO)", get_batch_total("Lebanese Beef Stew", "Potato")),
-        ("10MM DICED ZUCCHINI", get_batch_total("Moroccan Chicken", "Zucchini", from_subsection=True)),
+        ("10MM DICED ZUCCHINI", meal_recipes["Moroccan Chicken"]["sub_section"]["ingredients"].get("Zucchini", 0) * meal_totals.get("MOROCCAN CHICKEN".upper(), 0)),
         ("5MM DICED CABBAGE", get_batch_total("Beef Chow Mein", "Cabbage")),
         ("5MM DICED CAPSICUM", get_batch_total("Shepherd's Pie", "Capsicum") + get_batch_total("Beef Burrito Bowl", "Capsicum")),
         ("5MM DICED CARROTS", get_batch_total("Shepherd's Pie", "Carrots") + get_batch_total("Beef Burrito Bowl", "Carrot")),
         ("5MM DICED CELERY", get_batch_total("Beef Chow Mein", "Celery")),
         ("5MM DICED MUSHROOMS", get_batch_total("Shepherd's Pie", "Mushroom")),
-        # Fill these in if needed:
-        # ("5MM DICED ONION", ... ),
+        # 5MM DICED ONION: Not specified, you can sum all onion batch totals here or leave blank
+        ("5MM DICED ONION", 0),
         ("5MM MONGOLIAN CAPSICUM", get_batch_total("Mongolian Beef", "Capsicum")),
         ("5MM MONGOLIAN ONION", get_batch_total("Mongolian Beef", "Onion")),
-        # ("5MM SLICED MUSHROOMS", ... ),
+        # 5MM SLICED MUSHROOMS: Not specified, leave blank
+        ("5MM SLICED MUSHROOMS", 0),
         ("BROCCOLI", get_batch_total("Chicken and Broccoli Pasta", "Broccoli")),
-        ("CRATED CARROTS", get_batch_total("Spaghetti Bolognese", "Carrot")), # + Bean Nachos if present
+        ("CRATED CARROTS", get_batch_total("Spaghetti Bolognese", "Carrot")),  # Add Bean Nachos if you have recipe
         ("CRATED ZUCCHINI", get_batch_total("Spaghetti Bolognese", "Zucchini")),
-        ("LEMON POTATO", get_batch_total_bulk("Roasted Lemon Potatoes", "Potatoes")),
-        ("ROASTED POTATO", get_batch_total_bulk("Roasted Potatoes", "Roasted Potatoes")),
-        ("THAI POTATOS", get_batch_total_bulk("Roasted Thai Potatoes", "Potato")),
-        ("POTATO MASH", get_batch_total_bulk("Potato Mash", "Potato")),
-        ("SWEET POTATO MASH", get_batch_total_bulk("Sweet Potato Mash", "Sweet Potato")),
-        # For Chicken Mixing
-        ("SPINACH", get_total_from_chicken_mixing("Gnocchi", "Spinach")),
-        ("RED ONION", get_batch_total_bulk("Lamb Onion Marinated", "Red Onion")),
-        ("PARSLEY", get_batch_total_bulk("Lamb Onion Marinated", "Parsley")),
+        ("LEMON POTATO", get_bulk_total("Roasted Lemon Potatoes", "Potatoes")),
+        ("ROASTED POTATO", get_bulk_total("Roasted Potatoes", "Roasted Potatoes")),
+        ("THAI POTATOS", get_bulk_total("Roasted Thai Potatoes", "Potato")),
+        ("POTATO MASH", get_bulk_total("Potato Mash", "Potato")),
+        ("SWEET POTATO MASH", get_bulk_total("Sweet Potato Mash", "Sweet Potato")),
+        ("SPINACH", get_total_from_chicken_mixing()),
+        ("RED ONION", get_bulk_total("Lamb Onion Marinated", "Red Onion")),
+        ("PARSLEY", get_bulk_total("Lamb Onion Marinated", "Parsley")),
     ]
 
-    pdf.set_xy(right_x, curr_y)
-    pdf.set_font("Arial", "B", 11)
-    pdf.set_fill_color(230, 230, 230)
-    pdf.cell(col_w, ch, "Veg Prep", ln=1, fill=True)
-    pdf.set_x(right_x)
-    pdf.set_font("Arial", "B", 8)
-    for h, w in [("Veg Prep", 0.7), ("Amount", 0.3)]:
-        pdf.cell(col_w * w, ch, h, 1)
-    pdf.ln(ch)
-    pdf.set_font("Arial", "", 8)
-    for name, val in veg_prep:
-        pdf.set_x(right_x)
-        pdf.cell(col_w * 0.7, ch, name, 1)
-        pdf.cell(col_w * 0.3, ch, str(int(val) if val else 0), 1)
+    for veg, amt in veg_prep:
+        pdf.cell(col_w * 0.7, ch, veg, 1)
+        pdf.cell(col_w * 0.3, ch, str(int(round(amt))), 1)
         pdf.ln(ch)
-    right_end_y = pdf.get_y()
 
-    return max(left_end_y, right_end_y) + pad
+    # Advance Y for next section
+    pdf.ln(4)
+    return pdf.get_y()
