@@ -53,9 +53,16 @@ def draw_meat_veg_section(
     meat_order = [
         ("CHUCK ROLL (LEBO)", get_total_recipe_ingredient("Lebanese Beef Stew", "Chuck Diced")),
         ("BEEF TOPSIDE (MONG)", get_total_recipe_ingredient("Mongolian Beef", "Chuck")),
-        ("MINCE", sum_totals_recipe_ingredients(
-            ["Spaghetti Bolognese", "Shepherd's Pie", "Beef Chow Mein", "Beef Burrito Bowl", "Beef Meatballs"],
-            "Beef Mince")),
+        ("MINCE", 
+        sum_totals_recipe_ingredients(
+            ["Spaghetti Bolognese", "Shepherd's Pie", "Beef Chow Mein", "Beef Burrito Bowl"], 
+            "Beef Mince"
+        )
+        + sum_totals_recipe_ingredients(
+            ["Beef Meatballs"], 
+            "Mince"
+        )
+        ),
         ("TOPSIDE STEAK", get_total_bulk_ingredient("Steak", "Steak")),
         ("LAMB SHOULDER", get_total_bulk_ingredient("Lamb Marinate", "Lamb Shoulder")),
         ("MORROCAN CHICKEN", get_total_bulk_ingredient("Moroccan Chicken", "Chicken")),
