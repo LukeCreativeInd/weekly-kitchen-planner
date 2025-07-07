@@ -71,7 +71,7 @@ bulk_sections = [
      ]}
 ]
 
-def draw_bulk_section(pdf, meal_totals, xpos, col_w, ch, pad, bottom):
+def draw_bulk_section(pdf, meal_totals, xpos, col_w, ch, pad, bottom, header_date=None):
     title1 = f"Daily Production Report - {datetime.today().strftime('%d/%m/%Y')}"
     pdf.add_page()
     pdf.set_font("Arial","B",14)
