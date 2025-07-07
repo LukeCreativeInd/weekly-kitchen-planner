@@ -103,6 +103,7 @@ meal_recipes = {
             }
         }
     },
+    # New recipes (all batch sizes and ingredients from image mapping)
     "Steak with Mushroom Sauce": {
         "batch": 20,
         "ingredients": {
@@ -144,6 +145,12 @@ meal_recipes = {
         "batch": 6,
         "ingredients": {
             "Chicken Breast": 200
+        }
+    },
+    "Creamy Chicken & Mushroom Gnocchi": {
+        "batch": 36,
+        "ingredients": {
+            "Gnocchi": 150, "Chicken": 80, "Sauce": 200, "Spinach": 25
         }
     }
 }
