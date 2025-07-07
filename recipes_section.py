@@ -62,7 +62,7 @@ meal_recipes = {
         }
     },
     "Naked Chicken Parma": {
-        "batch": 60,
+        "batch": 0,
         "ingredients": {
             "Chicken": 150
         }
