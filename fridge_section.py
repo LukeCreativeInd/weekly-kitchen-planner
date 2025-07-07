@@ -21,20 +21,26 @@ def draw_fridge_section(pdf, meal_totals, xpos, col_w, ch, pad, bottom, start_y=
         pdf.cell(col_w * w, ch, h, 1)
     pdf.ln(ch)
     pdf.set_font("Arial", "", 8)
-    sauces = [("MONGOLIAN",70,"MONGOLIAN BEEF"),
-              ("MEATBALLS",120,"BEEF MEATBALLS"),
-              ("LEMON",50,"ROASTED LEMON CHICKEN"),
-              ("MUSHROOM",100,"STEAK WITH MUSHROOM SAUCE"),
-              ("FAJITA SAUCE",33,"CHICKEN FAJITA BOWL"),
-              ("BURRITO SAUCE",43,"BEEF BURRITO BOWL")]
+    sauces = [
+        ("MONGOLIAN", 70, "MONGOLIAN BEEF"),
+        ("MEATBALLS", 120, "BEEF MEATBALLS"),
+        ("LEMON", 50, "ROASTED LEMON CHICKEN & POTATOES"),
+        ("MUSHROOM", 100, "STEAK WITH MUSHROOM SAUCE"),
+        ("FAJITA SAUCE", 33, "CHICKEN FAJITA BOWL"),
+        ("BURRITO SAUCE", 43, "BEEF BURRITO BOWL"),
+    ]
     for sauce, qty, meal_key in sauces:
-        amt = meal_totals.get(meal_key, 0)
+        # For Lemon, always use 115 as "Amt", otherwise use meal totals
+        if sauce == "LEMON":
+            amt = 115  # or use whatever static value is correct
+        else:
+            amt = meal_totals.get(meal_key, 0)
         total = qty * amt
         pdf.set_x(left_x)
-        pdf.cell(col_w*0.4, ch, sauce, 1)
-        pdf.cell(col_w*0.2, ch, str(qty), 1)
-        pdf.cell(col_w*0.2, ch, str(amt), 1)
-        pdf.cell(col_w*0.2, ch, str(total), 1)
+        pdf.cell(col_w * 0.4, ch, sauce, 1)
+        pdf.cell(col_w * 0.2, ch, str(qty), 1)
+        pdf.cell(col_w * 0.2, ch, str(amt), 1)
+        pdf.cell(col_w * 0.2, ch, str(total), 1)
         pdf.ln(ch)
     left_end_y = pdf.get_y()
     
@@ -50,13 +56,13 @@ def draw_fridge_section(pdf, meal_totals, xpos, col_w, ch, pad, bottom, start_y=
     pdf.ln(ch)
     pdf.set_font("Arial", "", 8)
     amt = meal_totals.get("BEEF BURRITO BOWL", 0)
-    for ing, qty in [("Salsa",43),("Black Beans",50),("Corn",50),("Rice",130)]:
-        total = (qty * amt) / 60 if amt else 0
+    for ing, qty in [("Salsa", 43), ("Black Beans", 50), ("Corn", 50), ("Rice", 130)]:
+        total = qty * amt
         pdf.set_x(right_x)
-        pdf.cell(col_w*0.4, ch, ing, 1)
-        pdf.cell(col_w*0.2, ch, str(qty), 1)
-        pdf.cell(col_w*0.2, ch, str(amt), 1)
-        pdf.cell(col_w*0.2, ch, str(round(total,2)), 1)
+        pdf.cell(col_w * 0.4, ch, ing, 1)
+        pdf.cell(col_w * 0.2, ch, str(qty), 1)
+        pdf.cell(col_w * 0.2, ch, str(amt), 1)
+        pdf.cell(col_w * 0.2, ch, str(total), 1)
         pdf.ln(ch)
     right_end_y = pdf.get_y()
     
