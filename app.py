@@ -48,11 +48,12 @@ last_y = draw_fridge_section(pdf, meal_totals, xpos, col_w, ch, pad, bottom, sta
 pdf.set_y(last_y)
 last_y = draw_chicken_mixing_section(pdf, meal_totals, xpos, col_w, ch, pad, bottom, start_y=last_y)
 pdf.set_y(last_y)
-# After drawing chicken mixing section
-pdf.set_y(last_y)
-last_y = draw_meat_veg_section(
-    pdf, meal_totals, meal_recipes, bulk_sections, xpos, col_w, ch, pad, bottom, start_y=last_y
+
+# --- DO NOT pass start_y or assign last_y for this section ---
+draw_meat_veg_section(
+    pdf, meal_totals, meal_recipes, bulk_sections, xpos, col_w, ch, pad, bottom
 )
+
 
 
 # --- Always start Meat & Veg on new page ---
