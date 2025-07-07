@@ -54,7 +54,7 @@ def draw_meat_veg_section(
         ("LAMB SHOULDER", get_total_bulk_ingredient("Lamb Marinate", "Lamb Shoulder")),
         ("MORROCAN CHICKEN", get_total_bulk_ingredient("Moroccan Chicken", "Chicken")),
         ("ITALIAN CHICKEN", sum_totals_recipe_ingredients(
-            ["Chicken With Vegetables", "Chicken with Sweet Potato and Beans", "Naked Chicken Parma", "Chicken On Its Own"], "Chicken")),
+            ["Chicken With Vegetables", "Chicken Sweet Potato and Beans", "Naked Chicken Parma", "Chicken On Its Own"], "Chicken")),
         ("NORMAL CHICKEN", sum_totals_recipe_ingredients(
             ["Chicken Pesto Pasta", "Chicken and Broccoli Pasta", "Butter Chicken", "Thai Green Chicken Curry", "Creamy Chicken & Mushroom Gnocchi"], "Chicken")),
         ("CHICKEN THIGH", get_total_bulk_ingredient("Chicken Thigh", "Chicken")),
