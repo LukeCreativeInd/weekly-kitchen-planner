@@ -69,7 +69,7 @@ def draw_meat_veg_section(
         ("ITALIAN CHICKEN", sum_totals_recipe_ingredients(
             [
                 "Chicken With Vegetables",
-                "Chicken with Sweet Potato and Beans",
+                "Chicken Sweet Potato and Beans",
                 "Naked Chicken Parma",
                 "Chicken On Its Own"
             ], "Chicken")),
