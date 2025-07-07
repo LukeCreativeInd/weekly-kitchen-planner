@@ -123,7 +123,7 @@ meal_recipes = {
         }
     },
     "Beef Lasagna": {
-        "batch": 50,
+        "batch": 0,
         "ingredients": {
             "Lasange Sheets": 150, "Mozzerala Cheese Alba": 750, "Napoli Sauce": 500, "Bolognese": 3200
         }
