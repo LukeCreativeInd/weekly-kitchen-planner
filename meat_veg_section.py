@@ -138,8 +138,12 @@ def draw_meat_veg_section(
             get_batch_total("Lebanese Beef Stew", "Onion") +
             meal_recipes.get("Moroccan Chicken", {}).get("sub_section", {}).get("ingredients", {}).get("Onion", 0) * meal_totals.get("MOROCCAN CHICKEN".upper(), 0) +
             get_batch_total("Bean Nachos with Rice", "Onion")),
-        ("5MM MONGOLIAN CAPSICUM", get_batch_total("Mongolian Beef", "Capsicum")),
-        ("5MM MONGOLIAN ONION", get_batch_total("Mongolian Beef", "Onion")),
+        ("5MM MONGOLIAN CAPSICUM",
+            get_batch_total("Mongolian Beef", "Capsicum") +
+            get_batch_total("Chicken Fajita Bowl", "Capsicum")),
+        ("5MM MONGOLIAN ONION",
+            get_batch_total("Mongolian Beef", "Onion") +
+            get_batch_total("Chicken Fajita Bowl", "Red Onion")),
         ("5MM SLICED MUSHROOMS", 0),
         ("BROCCOLI", get_batch_total("Chicken and Broccoli Pasta", "Broccoli")),
         ("CRATED CARROTS", get_batch_total("Spaghetti Bolognese", "Carrot") + get_batch_total("Bean Nachos with Rice", "Carrot")),
