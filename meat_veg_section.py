@@ -4,6 +4,7 @@ def draw_meat_veg_section(
     pdf, meal_totals, meal_recipes, bulk_sections, xpos, col_w, ch, pad, bottom, start_y=None
 ):
     # Prepare Y
+    pdf.add_page()  # <-- This forces a new page, no matter what!
     y = start_y or pdf.get_y()
     pdf.set_y(y)
     pdf.set_font("Arial", "B", 14)
