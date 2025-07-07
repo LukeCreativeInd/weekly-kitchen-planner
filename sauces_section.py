@@ -3,7 +3,7 @@ import math
 def draw_sauces_section(pdf, meal_totals, xpos, col_w, ch, pad, bottom, start_y=None):
     sauces = {
         "Thai Sauce": {
-            "ingredients": [("Green Curry Paste", 7), ("Coconut Cream", 82)],
+            "ingredients": [("Green Curry Paste", 7), ("Coconut Cream", 90)],
             "meal_key": "THAI GREEN CHICKEN CURRY"
         },
         "Lamb Sauce": {
