@@ -85,9 +85,8 @@ last_y = draw_meat_veg_section(pdf, meal_totals, meal_recipes, bulk_sections, xp
 pdf.set_y(last_y)
 
 # --- PDF IN MEMORY FOR DOWNLOAD ---
-pdf_buffer = BytesIO()
-pdf.output(pdf_buffer)
-pdf_buffer.seek(0)
+pdf_bytes = pdf.output(dest="S").encode("latin1")
+pdf_buffer = BytesIO(pdf_bytes)
 
 # --- DOWNLOAD & SAVE ONLY IF DOWNLOADED ---
 if st.download_button(
@@ -98,6 +97,7 @@ if st.download_button(
 ):
     # Save to previous_reports folder ONLY if downloaded
     with open(report_path, "wb") as f:
-        f.write(pdf_buffer.getvalue())
+        f.write(pdf_bytes)
     st.success(f"Report saved as {fname}")
+
 
