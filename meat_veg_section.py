@@ -145,7 +145,10 @@ def draw_meat_veg_section(
             get_batch_total("Mongolian Beef", "Onion") +
             get_batch_total("Chicken Fajita Bowl", "Red Onion")),
         ("5MM SLICED MUSHROOMS", 0),
-        ("BROCCOLI", get_batch_total("Chicken and Broccoli Pasta", "Broccoli")),
+        ("BROCCOLI",
+            get_batch_total("Chicken and Broccoli Pasta", "Broccoli") +
+            get_batch_total("Chicken With Vegetables", "Broccoli")
+        ),
         ("CRATED CARROTS", get_batch_total("Spaghetti Bolognese", "Carrot") + get_batch_total("Bean Nachos with Rice", "Carrot")),
         ("CRATED ZUCCHINI", get_batch_total("Spaghetti Bolognese", "Zucchini")),
         ("LEMON POTATO", get_bulk_total("Roasted Lemon Potatoes", "Potatoes")),
