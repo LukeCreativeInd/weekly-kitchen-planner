@@ -54,15 +54,6 @@ draw_meat_veg_section(
     pdf, meal_totals, meal_recipes, bulk_sections, xpos, col_w, ch, pad, bottom
 )
 
-
-
-# --- Always start Meat & Veg on new page ---
-pdf.add_page()
-pdf.set_y(10)
-draw_meat_veg_section(
-    pdf, meal_totals, meal_recipes, bulk_sections, xpos, col_w, ch, pad, bottom, start_y=pdf.get_y()
-)
-
 fname = f"daily_production_report_{datetime.today().strftime('%d-%m-%Y')}.pdf"
 pdf.output(fname)
 with open(fname, "rb") as f:
