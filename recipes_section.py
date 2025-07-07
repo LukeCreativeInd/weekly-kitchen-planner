@@ -55,7 +55,7 @@ meal_recipes = {
             "Chicken": 135, "Corn": 52, "Beans": 60, "Broccoli": 67
         }
     },
-    "Chicken Sweet Potato and Beans": {
+    "Chicken with Sweet Potato and Beans": {
         "batch": 60,
         "ingredients": {
             "Chicken": 135, "Beans": 60
@@ -115,14 +115,14 @@ meal_recipes = {
             "Topside Steak": 200
         }
     },
-    "Beans Nachos": {
+    "Bean Nachos with Rice": {
         "batch": 60,
         "ingredients": {
             "Drained Beans": 80, "Carrot": 25, "Onion": 20, "Taco Seasoning": 1, "Salt": 1.5, "Pepper": 0.5, "Garlic": 2.5,
             "Vegetable Oil": 1.5, "Cumin": 0.5, "Crushed Tomato": 85, "Water": 41.7
         }
     },
-    "Beef Lasagne": {
+    "Beef Lasagna": {
         "batch": 50,
         "ingredients": {
             "Lasange Sheets": 150, "Mozzerala Cheese Alba": 750, "Napoli Sauce": 500, "Bolognese": 3200
