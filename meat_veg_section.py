@@ -44,21 +44,33 @@ def draw_meat_veg_section(
             total += qty * meals
         return total
 
-    meat_order = [
-        ("CHUCK ROLL (LEBO)", get_total_recipe_ingredient("Lebanese Beef Stew", "Chuck Diced")),
-        ("BEEF TOPSIDE (MONG)", get_total_recipe_ingredient("Mongolian Beef", "Chuck")),
-        ("MINCE", sum_totals_recipe_ingredients(
-            ["Spaghetti Bolognese", "Shepherd's Pie", "Beef Chow Mein", "Beef Burrito Bowl"], "Beef Mince") +
-            sum_totals_recipe_ingredients(["Beef Meatballs"], "Mince")),
-        ("TOPSIDE STEAK", get_total_bulk_ingredient("Steak", "Steak")),
-        ("LAMB SHOULDER", get_total_bulk_ingredient("Lamb Marinate", "Lamb Shoulder")),
-        ("MORROCAN CHICKEN", get_total_bulk_ingredient("Moroccan Chicken", "Chicken")),
-        ("ITALIAN CHICKEN", sum_totals_recipe_ingredients(
-            ["Chicken With Vegetables", "Chicken with Sweet Potato and Beans", "Naked Chicken Parma", "Chicken On Its Own"], "Chicken")),
-        ("NORMAL CHICKEN", sum_totals_recipe_ingredients(
-            ["Chicken Pesto Pasta", "Chicken and Broccoli Pasta", "Butter Chicken", "Thai Green Chicken Curry", "Creamy Chicken & Mushroom Gnocchi"], "Chicken")),
-        ("CHICKEN THIGH", get_total_bulk_ingredient("Chicken Thigh", "Chicken")),
-    ]
+meat_order = [
+    ("CHUCK ROLL (LEBO)", get_total_recipe_ingredient("Lebanese Beef Stew", "Chuck Diced")),
+    ("BEEF TOPSIDE (MONG)", get_total_recipe_ingredient("Mongolian Beef", "Chuck")),
+    ("MINCE", sum_totals_recipe_ingredients(
+        ["Spaghetti Bolognese", "Shepherd's Pie", "Beef Chow Mein", "Beef Burrito Bowl"], "Beef Mince") +
+        sum_totals_recipe_ingredients(["Beef Meatballs"], "Mince")),
+    ("TOPSIDE STEAK", get_total_bulk_ingredient("Steak", "Steak")),
+    ("LAMB SHOULDER", get_total_bulk_ingredient("Lamb Marinate", "Lamb Shoulder")),
+    ("MORROCAN CHICKEN", get_total_bulk_ingredient("Moroccan Chicken", "Chicken")),
+    # Here we use 153g for every meal
+    ("ITALIAN CHICKEN", sum(meal_totals.get(name.upper(), 0) for name in [
+        "Chicken With Vegetables",
+        "Chicken with Sweet Potato and Beans",
+        "Naked Chicken Parma",
+        "Chicken On Its Own"
+    ]) * 153),
+    # Here we use 130g for every meal
+    ("NORMAL CHICKEN", sum(meal_totals.get(name.upper(), 0) for name in [
+        "Chicken Pesto Pasta",
+        "Chicken and Broccoli Pasta",
+        "Butter Chicken",
+        "Thai Green Chicken Curry",
+        "Creamy Chicken & Mushroom Gnocchi"
+    ]) * 130),
+    ("CHICKEN THIGH", get_total_bulk_ingredient("Chicken Thigh", "Chicken")),
+]
+
 
     for mtype, amt in meat_order:
         pdf.cell(col_w * 0.6, ch, mtype, 1)
