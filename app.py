@@ -3,7 +3,6 @@ import pandas as pd
 from fpdf import FPDF
 from datetime import datetime
 import os
-import pickle
 
 from bulk_section import draw_bulk_section, bulk_sections
 from recipes_section import draw_recipes_section, meal_recipes
@@ -11,7 +10,6 @@ from sauces_section import draw_sauces_section
 from fridge_section import draw_fridge_section
 from chicken_mixing_section import draw_chicken_mixing_section
 from meat_veg_section import draw_meat_veg_section
-
 
 st.set_page_config(page_title="Bulk Ingredient Summary Report", layout="centered")
 
@@ -47,7 +45,7 @@ selected_date = st.date_input("Production Date", value=datetime.today())
 selected_date_str = selected_date.strftime("%Y-%m-%d")
 selected_date_header = selected_date.strftime("%d/%m/%Y")
 
-st.markdown("#### Upload CSV files for each brand (all optional, at least one required)")
+st.markdown("#### Upload CSV or Excel files for each brand (all optional, at least one required)")
 
 c1, c2, c3 = st.columns(3)
 with c1:
@@ -63,21 +61,32 @@ brand_names = ["Clean Eats", "Made Active", "Elite Meals"]
 files = [clean_file, made_file, elite_file]
 for f in files:
     if f is not None:
-        df = pd.read_csv(f)
-        df.columns = df.columns.str.strip().str.lower()
+        try:
+            if f.name.lower().endswith(".csv"):
+                df = pd.read_csv(f)
+            elif f.name.lower().endswith(".xlsx"):
+                df = pd.read_excel(f)
+            else:
+                st.error(f"Unsupported file type: {f.name}")
+                df = None
+        except Exception as e:
+            st.error(f"Error reading {f.name}: {e}")
+            df = None
+        if df is not None:
+            df.columns = df.columns.str.strip().str.lower()
         dfs.append(df)
     else:
         dfs.append(None)
 
 if all(d is None for d in dfs):
-    st.warning("Please upload at least one CSV file.")
+    st.warning("Please upload at least one CSV or Excel file.")
     st.stop()
 
 # --- Find all unique meals (product name) across all uploads ---
 all_meals = set()
 for df in dfs:
     if df is not None:
-        all_meals.update(df["product name"].str.strip())
+        all_meals.update(df["product name"].astype(str).str.strip())
 all_meals = sorted(all_meals)
 
 # --- Build summary table across all brands ---
@@ -88,7 +97,7 @@ for meal in all_meals:
     for idx, df in enumerate(dfs):
         val = 0
         if df is not None:
-            matches = df[df["product name"].str.strip() == meal]
+            matches = df[df["product name"].astype(str).str.strip() == meal]
             if not matches.empty:
                 val = matches["quantity"].values[0]
         row[brand_names[idx]] = val
@@ -155,4 +164,3 @@ if saved_reports:
         st.markdown(f"- [{fname}]({REPORTS_DIR}/{fname}) ({dt.strftime('%d/%m/%Y')})")
 else:
     st.info("No previous reports found.")
-
