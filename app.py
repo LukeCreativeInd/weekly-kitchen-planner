@@ -51,11 +51,11 @@ st.markdown("#### Upload CSV files for each brand (all optional, at least one re
 
 c1, c2, c3 = st.columns(3)
 with c1:
-    clean_file = st.file_uploader("Clean Eats", type=["csv"], key="clean")
+    clean_file = st.file_uploader("Clean Eats", type=["csv", "xlsx"], key="clean")
 with c2:
-    made_file = st.file_uploader("Made Active", type=["csv"], key="made")
+    made_file = st.file_uploader("Made Active", type=["csv", "xlsx"], key="made")
 with c3:
-    elite_file = st.file_uploader("Elite Meals", type=["csv"], key="elite")
+    elite_file = st.file_uploader("Elite Meals", type=["csv", "xlsx"], key="elite")
 
 # --- File Read Logic ---
 dfs = []
