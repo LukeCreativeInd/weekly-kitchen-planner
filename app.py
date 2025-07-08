@@ -5,12 +5,13 @@ from datetime import datetime
 import os
 import pickle
 
-from bulk_section import draw_bulk_section
+from bulk_section import draw_bulk_section, bulk_sections
 from recipes_section import draw_recipes_section, meal_recipes
 from sauces_section import draw_sauces_section
 from fridge_section import draw_fridge_section
 from chicken_mixing_section import draw_chicken_mixing_section
-from meat_veg_section import draw_meat_veg_section, bulk_sections
+from meat_veg_section import draw_meat_veg_section
+
 
 st.set_page_config(page_title="Bulk Ingredient Summary Report", layout="centered")
 
