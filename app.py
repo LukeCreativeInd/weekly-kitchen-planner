@@ -23,24 +23,6 @@ selected_date = st.date_input(
 selected_date_header = selected_date.strftime('%d/%m/%Y')
 selected_date_file = selected_date.strftime('%Y-%m-%d')
 
-# ---- Show all previously generated reports ----
-REPORTS_DIR = "reports"
-os.makedirs(REPORTS_DIR, exist_ok=True)
-
-all_reports = sorted([f for f in os.listdir(REPORTS_DIR) if f.endswith('.pdf')], reverse=True)
-search_q = st.text_input("Search previous reports (by filename/date):")
-filtered_reports = [f for f in all_reports if search_q.lower() in f.lower()]
-
-st.markdown("#### Previous Production Reports")
-if filtered_reports:
-    for report in filtered_reports:
-        with open(os.path.join(REPORTS_DIR, report), "rb") as f:
-            st.download_button(f"📄 {report}", f, file_name=report, mime="application/pdf")
-else:
-    st.info("No previous reports found (or none match search).")
-
-st.divider()
-
 # ---- File Uploaders for all brands ----
 uploaded_clean = st.file_uploader("Upload Clean Eats File", type=["csv", "xlsx"], key="clean")
 uploaded_made = st.file_uploader("Upload Made Active File", type=["csv", "xlsx"], key="made")
@@ -142,6 +124,8 @@ if st.button("Generate and Save PDF Report"):
     last_y = draw_meat_veg_section(pdf, all_meal_totals, meal_recipes, bulk_sections, xpos, col_w, ch, pad, bottom, start_y=last_y)
 
     # 3. Save PDF and present download button
+    REPORTS_DIR = "reports"
+    os.makedirs(REPORTS_DIR, exist_ok=True)
     fname = f"daily_production_report_{selected_date_file}.pdf"
     path = os.path.join(REPORTS_DIR, fname)
     pdf.output(path)
@@ -149,3 +133,20 @@ if st.button("Generate and Save PDF Report"):
     with open(path, "rb") as f:
         st.success(f"PDF saved as {fname}")
         st.download_button("📄 Download Bulk Order PDF", f, file_name=fname, mime="application/pdf")
+
+st.divider()
+
+# ---- Show all previously generated reports (moved to bottom) ----
+REPORTS_DIR = "reports"
+os.makedirs(REPORTS_DIR, exist_ok=True)
+all_reports = sorted([f for f in os.listdir(REPORTS_DIR) if f.endswith('.pdf')], reverse=True)
+search_q = st.text_input("Search previous reports (by filename/date):")
+filtered_reports = [f for f in all_reports if search_q.lower() in f.lower()]
+
+st.markdown("#### Previous Production Reports")
+if filtered_reports:
+    for report in filtered_reports:
+        with open(os.path.join(REPORTS_DIR, report), "rb") as f:
+            st.download_button(f"📄 {report}", f, file_name=report, mime="application/pdf")
+else:
+    st.info("No previous reports found (or none match search).")
