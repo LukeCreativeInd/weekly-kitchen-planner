@@ -132,6 +132,7 @@ if st.button("Generate & Save Production Report PDF"):
     col_w = page_w / 2 - 5
     ch, pad, bottom = 6, 4, a4_h - 17
     xpos = [left, left + col_w + 10]
+
     last_y = draw_bulk_section(pdf, meal_totals_total, xpos, col_w, ch, pad, bottom, start_y=None, header_date=selected_date_header)
     pdf.set_y(last_y)
     last_y = draw_recipes_section(pdf, meal_totals_total, xpos, col_w, ch, pad, bottom, start_y=last_y)
@@ -142,10 +143,9 @@ if st.button("Generate & Save Production Report PDF"):
     pdf.set_y(last_y)
     last_y = draw_chicken_mixing_section(pdf, meal_totals_total, xpos, col_w, ch, pad, bottom, start_y=last_y)
     pdf.set_y(last_y)
-    last_y = draw_meat_veg_section(pdf, meal_totals_total, xpos, col_w, ch, pad, bottom, start_y=last_y)
+    last_y = draw_meat_veg_section(pdf, meal_totals_total, meal_recipes, bulk_sections, xpos, col_w, ch, pad, bottom, start_y=last_y)
     # Save to Bytes
     pdf_buffer = pdf.output(dest='S').encode('latin1')
-    # Save report for historical list
     report_fname = save_report(pdf_buffer, selected_date_str)
     st.success(f"Production report for {selected_date_header} saved!")
     st.download_button("📄 Download Production Report PDF", pdf_buffer, file_name=f"daily_production_report_{selected_date_str}.pdf", mime="application/pdf")
