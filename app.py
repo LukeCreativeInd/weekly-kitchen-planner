@@ -133,7 +133,10 @@ if st.button("Generate & Save Production Report PDF") and meal_summary_df is not
     pdf.set_y(last_y)
     last_y = draw_chicken_mixing_section(pdf, meal_totals_total, xpos, page_w//2-5, ch, pad, bottom, start_y=last_y)
     pdf.set_y(last_y)
-    last_y = draw_meat_veg_section(pdf, meal_totals_total, xpos, page_w//2-5, ch, pad, bottom, start_y=last_y)
+    last_y = draw_meat_veg_section(
+    pdf, meal_totals_total, meal_recipes, bulk_sections, xpos, page_w//2-5, ch, pad, bottom, start_y=last_y
+   )
+
 
     # 3. Save & download
     pdf_buffer = pdf.output(dest='S').encode('latin1')
