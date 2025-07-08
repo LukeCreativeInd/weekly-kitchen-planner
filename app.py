@@ -21,23 +21,64 @@ selected_date_file = selected_date.strftime("%Y-%m-%d")
 
 # --- GENERATE NEW REPORT ---
 st.markdown("## 📝 Generate New Report")
-uploaded_file = st.file_uploader("Upload Production File (CSV or Excel)", type=["csv", "xlsx"])
+col1, col2, col3 = st.columns(3)
+with col1:
+    file_clean = st.file_uploader("Upload Clean Eats File", type=["csv", "xlsx"], key="clean")
+with col2:
+    file_made = st.file_uploader("Upload Made Active File", type=["csv", "xlsx"], key="made")
+with col3:
+    file_elite = st.file_uploader("Upload Elite Meals File", type=["csv", "xlsx"], key="elite")
 
-if uploaded_file:
-    # --- READ FILE ---
-    if uploaded_file.name.endswith(".csv"):
-        df = pd.read_csv(uploaded_file)
-    else:
-        df = pd.read_excel(uploaded_file)
+file_dfs = []
+labels = []
+if file_clean:
+    df = pd.read_csv(file_clean) if file_clean.name.endswith(".csv") else pd.read_excel(file_clean)
+    df["Source"] = "Clean Eats"
+    file_dfs.append(df)
+    labels.append("Clean Eats")
+if file_made:
+    df = pd.read_csv(file_made) if file_made.name.endswith(".csv") else pd.read_excel(file_made)
+    df["Source"] = "Made Active"
+    file_dfs.append(df)
+    labels.append("Made Active")
+if file_elite:
+    df = pd.read_csv(file_elite) if file_elite.name.endswith(".csv") else pd.read_excel(file_elite)
+    df["Source"] = "Elite Meals"
+    file_dfs.append(df)
+    labels.append("Elite Meals")
 
-    # --- NORMALISE COLUMNS ---
-    df.columns = df.columns.str.strip().str.lower()
-    if not {"product name", "quantity"}.issubset(df.columns):
-        st.error("CSV must contain 'Product name' and 'Quantity'")
+if file_dfs:
+    df_all = pd.concat(file_dfs, ignore_index=True)
+    # Normalise columns
+    df_all.columns = df_all.columns.str.strip().str.lower()
+    if not {"product name", "quantity", "source"}.issubset(df_all.columns):
+        st.error("CSV must contain 'Product name', 'Quantity', and 'Source'")
         st.stop()
 
-    st.dataframe(df)
-    meal_totals = dict(zip(df["product name"].str.upper(), df["quantity"]))
+    # Summary Table
+    summary = df_all.pivot_table(
+        index="product name",
+        columns="source",
+        values="quantity",
+        aggfunc="sum",
+        fill_value=0
+    )
+    summary["Total"] = summary.sum(axis=1)
+    summary = summary.reset_index()
+    # Ensure all three columns exist
+    for lbl in ["Clean Eats", "Made Active", "Elite Meals"]:
+        if lbl not in summary.columns:
+            summary[lbl] = 0
+    # Sort columns for display
+    display_cols = ["product name", "Clean Eats", "Made Active", "Elite Meals", "Total"]
+    summary = summary[display_cols]
+    st.markdown("### Meal Quantities Per Client")
+    st.dataframe(summary)
+
+    # Build meal_totals as required by the rest of the app (by uppercase product name)
+    meal_totals = dict(
+        zip(summary["product name"].str.upper(), summary["Total"])
+    )
 
     # --- SETUP PDF ---
     pdf = FPDF()
@@ -79,7 +120,6 @@ if uploaded_file:
         file_name=fname,
         mime="application/pdf"
     ):
-        # Only save the PDF if the user clicks download
         with open(report_path, "wb") as f:
             f.write(pdf_bytes)
         st.success(f"Report saved to: {report_path}")
