@@ -21,31 +21,30 @@ selected_date = st.date_input("Select Production Date", value=datetime.today())
 selected_date_str = selected_date.strftime('%Y-%m-%d')
 selected_date_header = selected_date.strftime('%d/%m/%Y')
 
-# --- Multi-File Uploads (Allow 1-3) ---
-st.markdown("#### Upload Production Files (Clean Eats, Made Active, Elite Meals)")
-uploaded_files = st.file_uploader(
-    "Upload 1–3 CSV or Excel files (one for each group)", 
-    type=["csv", "xlsx"], accept_multiple_files=True
-)
+# --- Individual File Uploaders ---
+st.markdown("#### Upload Production Files for Each Brand (CSV or Excel)")
+clean_eats_file = st.file_uploader("Upload Clean Eats", type=["csv", "xlsx"], key="clean_eats")
+made_active_file = st.file_uploader("Upload Made Active", type=["csv", "xlsx"], key="made_active")
+elite_meals_file = st.file_uploader("Upload Elite Meals", type=["csv", "xlsx"], key="elite_meals")
 
-# --- Meal Group Names (for the summary table) ---
 group_labels = ["Clean Eats", "Made Active", "Elite Meals"]
+group_files = [clean_eats_file, made_active_file, elite_meals_file]
 group_dfs = [None, None, None]
 
-if uploaded_files:
-    for idx, file in enumerate(uploaded_files):
+# --- Parse files into dataframes ---
+for idx, file in enumerate(group_files):
+    if file is not None:
         if file.name.endswith(".csv"):
             df = pd.read_csv(file)
         else:
             df = pd.read_excel(file)
         df.columns = df.columns.str.strip().str.lower()
-        # Try to standardise columns
         if {"product name", "quantity"}.issubset(df.columns):
             group_dfs[idx] = df.copy()
         else:
-            st.error(f"File {file.name} missing required columns.")
-else:
-    group_dfs = [None, None, None]
+            st.error(f"File for {group_labels[idx]} missing required columns.")
+    else:
+        group_dfs[idx] = None
 
 # --- Build Summary Table (before editing) ---
 def build_summary_table(dfs, group_labels):
@@ -86,9 +85,7 @@ if any(df is not None for df in group_dfs):
 
 # --- Wait for input before PDF generation ---
 if meal_summary_df is not None and not meal_summary_df.empty:
-    # --- Create meal_totals for rest of the PDF (use 'Total' column) ---
     meal_totals_total = dict(zip(meal_summary_df["Meal"].str.upper(), meal_summary_df["Total"]))
-    # (Rest of app expects all uppercase meal names as keys)
 else:
     meal_totals_total = {}
 
@@ -140,7 +137,6 @@ if st.button("Generate & Save Production Report PDF") and meal_summary_df is not
 
     # 3. Save & download
     pdf_buffer = pdf.output(dest='S').encode('latin1')
-    # Store PDF for future viewing
     save_path = os.path.join(REPORTS_DIR, f"production_report_{selected_date_str}.pdf")
     with open(save_path, "wb") as f:
         f.write(pdf_buffer)
@@ -164,4 +160,3 @@ if filtered_reports:
             st.download_button(f"Download {r}", f, file_name=r, mime="application/pdf")
 else:
     st.info("No previous reports found.")
-
