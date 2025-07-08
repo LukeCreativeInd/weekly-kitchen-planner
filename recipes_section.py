@@ -1,5 +1,4 @@
 import math
-from recipes_section import draw_recipes_section, meal_recipes
 
 # Export meal_recipes for use elsewhere
 meal_recipes = {
