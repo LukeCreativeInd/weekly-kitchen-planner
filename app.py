@@ -3,6 +3,7 @@ import pandas as pd
 from fpdf import FPDF
 from datetime import datetime
 import os
+
 from recipes_section import draw_recipes_section, meal_recipes
 from bulk_section import draw_bulk_section, bulk_sections
 from sauces_section import draw_sauces_section
@@ -15,7 +16,7 @@ os.makedirs(REPORTS_DIR, exist_ok=True)
 
 st.title("📦 Bulk Ingredient Summary Report")
 
-# Date picker for production date
+# --- Date picker ---
 selected_date = st.date_input(
     "Production date (for report heading & saving)",
     value=datetime.today()
@@ -52,7 +53,6 @@ for brand, file in brand_files:
         dfs.append(None)
         meal_brand_maps.append({})
 
-# Ensure at least one file uploaded
 if all(df is None for df in dfs):
     st.warning("Please upload at least one file to proceed.")
     st.stop()
@@ -82,7 +82,7 @@ summary_df = pd.DataFrame(summary_rows)
 # Use combined totals for all recipe calculations
 meal_totals_total = {row["Meal"].upper(): row["Total"] for row in summary_rows}
 
-# Display the summary table
+# --- Display the summary table ---
 st.markdown("### Quantity Summary Table")
 st.dataframe(summary_df, hide_index=True)
 
@@ -104,7 +104,7 @@ if st.button("Generate & Save Production Report PDF"):
     pdf.ln(5)
     pdf.set_font("Arial", "B", 10)
     th = 8
-    col_widths = [50, 25, 25, 25, 25]  # Adjust as needed for columns
+    col_widths = [70, 25, 25, 25, 25]  # Make first col wider for full meal names
     for i, col in enumerate(summary_df.columns):
         pdf.cell(col_widths[i], th, col, border=1)
     pdf.ln(th)
@@ -132,15 +132,15 @@ if st.button("Generate & Save Production Report PDF"):
     pdf.set_y(last_y)
 
     fname = f"daily_production_report_{selected_date}.pdf"
-    pdf.output(os.path.join(REPORTS_DIR, fname))
-    with open(os.path.join(REPORTS_DIR, fname), "rb") as f:
+    save_path = os.path.join(REPORTS_DIR, fname)
+    pdf.output(save_path)
+    with open(save_path, "rb") as f:
         st.download_button("📄 Download Bulk Order PDF", f, file_name=fname, mime="application/pdf")
     st.success(f"Report saved as {fname}!")
 
-# ---- Previous reports below upload ----
+# ---- Previous reports section BELOW upload ----
 st.markdown("---")
 st.markdown("## Previous Reports")
-# Search
 search_query = st.text_input("Search previous reports by date or keyword").lower()
 report_files = sorted([f for f in os.listdir(REPORTS_DIR) if f.endswith(".pdf")], reverse=True)
 filtered_reports = [f for f in report_files if search_query in f.lower()]
