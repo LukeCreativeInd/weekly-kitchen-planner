@@ -17,7 +17,7 @@ st.title("📦 Bulk Ingredient Summary Report")
 
 # Date picker for production date
 selected_date = st.date_input(
-    "Production date (for report heading & saving)", 
+    "Production date (for report heading & saving)",
     value=datetime.today()
 )
 selected_date_header = selected_date.strftime('%d/%m/%Y')
@@ -97,7 +97,27 @@ if st.button("Generate & Save Production Report PDF"):
     ch, pad, bottom = 6, 4, a4_h - 17
     xpos = [left, left + col_w + 10]
 
-    # --- Draw all sections in order ---
+    # --- Summary Table as First Page ---
+    pdf.add_page()
+    pdf.set_font("Arial", "B", 14)
+    pdf.cell(0, 10, f"Production Summary ({selected_date_header})", ln=1, align="C")
+    pdf.ln(5)
+    pdf.set_font("Arial", "B", 10)
+    th = 8
+    col_widths = [50, 25, 25, 25, 25]  # Adjust as needed for columns
+    for i, col in enumerate(summary_df.columns):
+        pdf.cell(col_widths[i], th, col, border=1)
+    pdf.ln(th)
+    pdf.set_font("Arial", "", 10)
+    for _, row in summary_df.iterrows():
+        pdf.cell(col_widths[0], th, str(row["Meal"]), border=1)
+        pdf.cell(col_widths[1], th, str(row["Clean Eats"]), border=1)
+        pdf.cell(col_widths[2], th, str(row["Made Active"]), border=1)
+        pdf.cell(col_widths[3], th, str(row["Elite Meals"]), border=1)
+        pdf.cell(col_widths[4], th, str(row["Total"]), border=1)
+        pdf.ln(th)
+
+    # --- Draw all report sections on subsequent pages ---
     last_y = draw_bulk_section(pdf, meal_totals_total, xpos, col_w, ch, pad, bottom, start_y=None, header_date=selected_date_header)
     pdf.set_y(last_y)
     last_y = draw_recipes_section(pdf, meal_totals_total, xpos, col_w, ch, pad, bottom, start_y=last_y)
@@ -111,30 +131,8 @@ if st.button("Generate & Save Production Report PDF"):
     last_y = draw_meat_veg_section(pdf, meal_totals_total, meal_recipes, bulk_sections, xpos, col_w, ch, pad, bottom, start_y=last_y)
     pdf.set_y(last_y)
 
-    # --- Add summary table as first page ---
-    pdf_summary = FPDF()
-    pdf_summary.add_page()
-    pdf_summary.set_font("Arial", "B", 14)
-    pdf_summary.cell(0, 10, f"Production Summary ({selected_date_header})", ln=1, align="C")
-    pdf_summary.ln(5)
-    pdf_summary.set_font("Arial", "B", 10)
-    th = 8
-    for col in summary_df.columns:
-        pdf_summary.cell(40, th, col, border=1)
-    pdf_summary.ln(th)
-    pdf_summary.set_font("Arial", "", 10)
-    for _, row in summary_df.iterrows():
-        for val in row:
-            pdf_summary.cell(40, th, str(val), border=1)
-        pdf_summary.ln(th)
-    # Combine summary + main PDF
-    for page in range(1, pdf.page_no() + 1):
-        pdf_summary.add_page()
-        tpl = pdf.pages[page - 1]
-        pdf_summary.pages[-1] = tpl
-    # Save combined PDF
     fname = f"daily_production_report_{selected_date}.pdf"
-    pdf_summary.output(os.path.join(REPORTS_DIR, fname))
+    pdf.output(os.path.join(REPORTS_DIR, fname))
     with open(os.path.join(REPORTS_DIR, fname), "rb") as f:
         st.download_button("📄 Download Bulk Order PDF", f, file_name=fname, mime="application/pdf")
     st.success(f"Report saved as {fname}!")
@@ -153,4 +151,3 @@ if filtered_reports:
             st.download_button(f"Download {rep}", f, file_name=rep, mime="application/pdf")
 else:
     st.info("No previous reports found.")
-
