@@ -87,8 +87,7 @@ selected_date = st.date_input("Production Date", value=datetime.today())
 selected_date_str = selected_date.strftime("%Y-%m-%d")
 
 # Process uploaded files
-dfs = [parse_uploaded_file(f) for f in [uploaded_clean, uploaded_made, uploaded_elite]]
-if not any(dfs):
+if all(df is None for df in dfs):
     st.info("Please upload at least one file.")
     st.stop()
 
