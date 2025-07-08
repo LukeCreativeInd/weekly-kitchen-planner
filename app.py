@@ -3,145 +3,102 @@ import pandas as pd
 from fpdf import FPDF
 from datetime import datetime
 import os
-import glob
-import io
-
-from bulk_section import draw_bulk_section
-from recipes_section import draw_recipes_section
+from recipes_section import draw_recipes_section, meal_recipes
+from bulk_section import draw_bulk_section, bulk_sections
 from sauces_section import draw_sauces_section
 from fridge_section import draw_fridge_section
 from chicken_mixing_section import draw_chicken_mixing_section
 from meat_veg_section import draw_meat_veg_section
 
-# --- Config & Constants ---
-REPORTS_DIR = "reports"
+REPORTS_DIR = "production_reports"
 os.makedirs(REPORTS_DIR, exist_ok=True)
 
-def load_uploaded_file(label):
-    return st.file_uploader(f"Upload {label} (CSV or Excel)", type=["csv", "xlsx"], key=label)
+st.title("📦 Bulk Ingredient Summary Report")
 
-def parse_uploaded_file(uploaded_file):
-    if uploaded_file is None:
-        return None
-    if uploaded_file.name.endswith(".csv"):
-        df = pd.read_csv(uploaded_file)
-    else:
-        df = pd.read_excel(uploaded_file)
-    df.columns = df.columns.str.strip().str.lower()
-    if not {"product name", "quantity"}.issubset(df.columns):
-        st.error(f"{uploaded_file.name} must contain 'Product name' and 'Quantity'")
-        return None
-    return df
+# Date picker for production date
+selected_date = st.date_input(
+    "Production date (for report heading & saving)", 
+    value=datetime.today()
+)
+selected_date_header = selected_date.strftime('%d/%m/%Y')
 
-def summary_table(meal_keys, clean, made, elite, total):
-    data = []
-    for meal in meal_keys:
-        data.append({
-            "Meal": meal,
-            "Clean Eats": clean.get(meal, 0),
-            "Made Active": made.get(meal, 0),
-            "Elite Meals": elite.get(meal, 0),
-            "Total": total.get(meal, 0),
-        })
-    return pd.DataFrame(data)
+# --- File uploaders ---
+st.markdown("### Upload meal quantity files for each brand (at least one required)")
+uploaded_clean = st.file_uploader("Upload Clean Eats file", type=["csv", "xlsx"], key="clean")
+uploaded_made = st.file_uploader("Upload Made Active file", type=["csv", "xlsx"], key="made")
+uploaded_elite = st.file_uploader("Upload Elite Meals file", type=["csv", "xlsx"], key="elite")
 
-def save_pdf_report(pdf_buffer, date_str):
-    fname = f"daily_production_report_{date_str}.pdf"
-    fpath = os.path.join(REPORTS_DIR, fname)
-    with open(fpath, "wb") as f:
-        f.write(pdf_buffer.getbuffer())
-    return fpath
-
-def list_reports():
-    files = glob.glob(os.path.join(REPORTS_DIR, "*.pdf"))
-    files = sorted(files, reverse=True)
-    return files
-
-# --- Streamlit UI ---
-st.title("Bulk Ingredient Summary Report")
-
-# File uploads
-st.markdown("#### Upload Meal Production Files")
-uploaded_clean = load_uploaded_file("Clean Eats")
-uploaded_made = load_uploaded_file("Made Active")
-uploaded_elite = load_uploaded_file("Elite Meals")
-
-# Parse uploads (can upload any, all or just one)
-dfs = [
-    parse_uploaded_file(uploaded_clean),
-    parse_uploaded_file(uploaded_made),
-    parse_uploaded_file(uploaded_elite)
+brand_files = [
+    ("Clean Eats", uploaded_clean),
+    ("Made Active", uploaded_made),
+    ("Elite Meals", uploaded_elite)
 ]
+dfs = []
+meal_brand_maps = []
 
-# Date selection
-selected_date = st.date_input("Production Date", value=datetime.today())
-selected_date_str = selected_date.strftime("%Y-%m-%d")
+for brand, file in brand_files:
+    if file:
+        if file.name.endswith(".csv"):
+            df = pd.read_csv(file)
+        else:
+            df = pd.read_excel(file)
+        df.columns = df.columns.str.strip().str.lower()
+        if not {"product name", "quantity"}.issubset(df.columns):
+            st.error(f"{brand} file must contain 'Product name' and 'Quantity'")
+            st.stop()
+        dfs.append(df)
+        meal_brand_maps.append(dict(zip(df["product name"].str.upper(), df["quantity"])))
+    else:
+        dfs.append(None)
+        meal_brand_maps.append({})
 
-# Stop if none uploaded
+# Ensure at least one file uploaded
 if all(df is None for df in dfs):
-    st.info("Please upload at least one file.")
+    st.warning("Please upload at least one file to proceed.")
     st.stop()
 
-# Build meal totals per file
-meal_totals_clean = {}
-meal_totals_made = {}
-meal_totals_elite = {}
-if dfs[0] is not None:
-    meal_totals_clean = {str(row["product name"]).strip().upper(): int(row["quantity"]) for _, row in dfs[0].iterrows()}
-if dfs[1] is not None:
-    meal_totals_made = {str(row["product name"]).strip().upper(): int(row["quantity"]) for _, row in dfs[1].iterrows()}
-if dfs[2] is not None:
-    meal_totals_elite = {str(row["product name"]).strip().upper(): int(row["quantity"]) for _, row in dfs[2].iterrows()}
+# Get all unique product names (for summary table)
+all_meal_names = set()
+for df in dfs:
+    if df is not None:
+        all_meal_names.update(df["product name"].str.upper())
 
-# Combine totals for all brands
-all_meals = set(meal_totals_clean) | set(meal_totals_made) | set(meal_totals_elite)
-meal_totals_total = {meal: meal_totals_clean.get(meal, 0) + meal_totals_made.get(meal, 0) + meal_totals_elite.get(meal, 0) for meal in all_meals}
+# Build summary table (Meal | Clean | Made | Elite | Total)
+summary_rows = []
+for meal in sorted(all_meal_names):
+    ce = meal_brand_maps[0].get(meal, 0)
+    ma = meal_brand_maps[1].get(meal, 0)
+    el = meal_brand_maps[2].get(meal, 0)
+    total = ce + ma + el
+    summary_rows.append({
+        "Meal": meal.title(),
+        "Clean Eats": ce,
+        "Made Active": ma,
+        "Elite Meals": el,
+        "Total": total
+    })
+summary_df = pd.DataFrame(summary_rows)
 
-# Build summary DataFrame for table and PDF
-summary_df = summary_table(
-    sorted(all_meals, key=lambda k: meal_totals_total[k], reverse=True),
-    meal_totals_clean, meal_totals_made, meal_totals_elite, meal_totals_total
-)
+# Use combined totals for all recipe calculations
+meal_totals_total = {row["Meal"].upper(): row["Total"] for row in summary_rows}
 
-st.markdown("#### Meal Totals by Brand")
-st.dataframe(summary_df, use_container_width=True)
+# Display the summary table
+st.markdown("### Quantity Summary Table")
+st.dataframe(summary_df, hide_index=True)
 
-# ---- Generate PDF Button ----
-generate = st.button("Generate Daily Production PDF")
-if generate:
+# ---- PDF creation ----
+if st.button("Generate & Save Production Report PDF"):
     pdf = FPDF()
     pdf.set_auto_page_break(False)
     a4_w, a4_h = 210, 297
     left = 10
-    page_w = a4_w - 2*left
-    col_w = page_w/2 - 5
+    page_w = a4_w - 2 * left
+    col_w = page_w / 2 - 5
     ch, pad, bottom = 6, 4, a4_h - 17
     xpos = [left, left + col_w + 10]
 
-    # --- Draw summary table at top ---
-    pdf.add_page()
-    pdf.set_font("Arial", "B", 16)
-    pdf.cell(0, 10, f"Daily Production Report - {selected_date.strftime('%d/%m/%Y')}", ln=1, align="C")
-    pdf.ln(5)
-    pdf.set_font("Arial", "B", 11)
-    pdf.cell(col_w, ch, "Meal", 1)
-    pdf.cell(col_w*0.4, ch, "Clean Eats", 1)
-    pdf.cell(col_w*0.4, ch, "Made Active", 1)
-    pdf.cell(col_w*0.4, ch, "Elite Meals", 1)
-    pdf.cell(col_w*0.4, ch, "Total", 1)
-    pdf.ln(ch)
-    pdf.set_font("Arial", "", 10)
-    for _, row in summary_df.iterrows():
-        pdf.cell(col_w, ch, str(row["Meal"]), 1)
-        pdf.cell(col_w*0.4, ch, str(row["Clean Eats"]), 1)
-        pdf.cell(col_w*0.4, ch, str(row["Made Active"]), 1)
-        pdf.cell(col_w*0.4, ch, str(row["Elite Meals"]), 1)
-        pdf.cell(col_w*0.4, ch, str(row["Total"]), 1)
-        pdf.ln(ch)
-
-    # ---- Pass only total dict to section functions! ----
-    last_y = pdf.get_y() + 8
-    last_y = draw_bulk_section(pdf, meal_totals_total, xpos, col_w, ch, pad, bottom, start_y=last_y, header_date=selected_date.strftime('%d/%m/%Y'))
+    # --- Draw all sections in order ---
+    last_y = draw_bulk_section(pdf, meal_totals_total, xpos, col_w, ch, pad, bottom, start_y=None, header_date=selected_date_header)
     pdf.set_y(last_y)
     last_y = draw_recipes_section(pdf, meal_totals_total, xpos, col_w, ch, pad, bottom, start_y=last_y)
     pdf.set_y(last_y)
@@ -151,31 +108,49 @@ if generate:
     pdf.set_y(last_y)
     last_y = draw_chicken_mixing_section(pdf, meal_totals_total, xpos, col_w, ch, pad, bottom, start_y=last_y)
     pdf.set_y(last_y)
-    last_y = draw_meat_veg_section(pdf, meal_totals_total, xpos, col_w, ch, pad, bottom, start_y=last_y)
+    last_y = draw_meat_veg_section(pdf, meal_totals_total, meal_recipes, bulk_sections, xpos, col_w, ch, pad, bottom, start_y=last_y)
     pdf.set_y(last_y)
 
-    # ---- Save & Download PDF ----
-    pdf_buffer = io.BytesIO()
-    pdf.output(pdf_buffer)
-    saved_path = save_pdf_report(pdf_buffer, selected_date_str)
-    st.success(f"Report saved: {saved_path}")
+    # --- Add summary table as first page ---
+    pdf_summary = FPDF()
+    pdf_summary.add_page()
+    pdf_summary.set_font("Arial", "B", 14)
+    pdf_summary.cell(0, 10, f"Production Summary ({selected_date_header})", ln=1, align="C")
+    pdf_summary.ln(5)
+    pdf_summary.set_font("Arial", "B", 10)
+    th = 8
+    for col in summary_df.columns:
+        pdf_summary.cell(40, th, col, border=1)
+    pdf_summary.ln(th)
+    pdf_summary.set_font("Arial", "", 10)
+    for _, row in summary_df.iterrows():
+        for val in row:
+            pdf_summary.cell(40, th, str(val), border=1)
+        pdf_summary.ln(th)
+    # Combine summary + main PDF
+    for page in range(1, pdf.page_no() + 1):
+        pdf_summary.add_page()
+        tpl = pdf.pages[page - 1]
+        pdf_summary.pages[-1] = tpl
+    # Save combined PDF
+    fname = f"daily_production_report_{selected_date}.pdf"
+    pdf_summary.output(os.path.join(REPORTS_DIR, fname))
+    with open(os.path.join(REPORTS_DIR, fname), "rb") as f:
+        st.download_button("📄 Download Bulk Order PDF", f, file_name=fname, mime="application/pdf")
+    st.success(f"Report saved as {fname}!")
 
-    st.download_button(
-        label="📄 Download Daily Production PDF",
-        data=pdf_buffer.getvalue(),
-        file_name=os.path.basename(saved_path),
-        mime="application/pdf"
-    )
-
-# -------- Show Previous Reports (Search below UI) --------
+# ---- Previous reports below upload ----
 st.markdown("---")
-st.markdown("### Previous Daily Production Reports")
-search_query = st.text_input("Search previous reports by date (YYYY-MM-DD):", "")
-report_files = list_reports()
-if search_query:
-    report_files = [f for f in report_files if search_query in os.path.basename(f)]
-if report_files:
-    for f in report_files:
-        st.markdown(f"[{os.path.basename(f)}]({f})")
+st.markdown("## Previous Reports")
+# Search
+search_query = st.text_input("Search previous reports by date or keyword").lower()
+report_files = sorted([f for f in os.listdir(REPORTS_DIR) if f.endswith(".pdf")], reverse=True)
+filtered_reports = [f for f in report_files if search_query in f.lower()]
+if filtered_reports:
+    for rep in filtered_reports:
+        rep_path = os.path.join(REPORTS_DIR, rep)
+        with open(rep_path, "rb") as f:
+            st.download_button(f"Download {rep}", f, file_name=rep, mime="application/pdf")
 else:
     st.info("No previous reports found.")
+
