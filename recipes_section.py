@@ -6,14 +6,14 @@ meal_recipes = {
         "batch": 90,
         "ingredients": {
             "Beef Mince": 100, "Napoli Sauce": 65, "Crushed Tomatoes": 45, "Beef Stock": 30,
-            "Onion": 15, "Zucchini": 15, "Carrot": 15, "Vegetable Oil": 1, "Salt": 2, "Pepper": 0.5, "Spaghetti": 68
+            "Onion": 15, "Zucchini": 15, "Carrot": 15, "Vegetable Oil": 1, "Salt": 3, "Pepper": 1, "Spaghetti": 68
         }
     },
     "Beef Chow Mein": {
         "batch": 80,
         "ingredients": {
             "Beef Mince": 120, "Celery": 42, "Carrot": 42, "Cabbage": 42, "Onion": 42,
-            "Oil": 2, "Pepper": 0.8, "Soy Sauce": 13, "Oyster Sauce": 13, "Rice": 130
+            "Oil": 2, "Pepper": 1, "Salt": 0.5, "Soy Sauce": 13, "Oyster Sauce": 13, "Rice": 130
         }
     },
     "Shepherd's Pie": {
