@@ -17,7 +17,6 @@ from meat_veg_section import draw_meat_veg_section
 REPORTS_DIR = "reports"
 os.makedirs(REPORTS_DIR, exist_ok=True)
 
-# --- Utility Functions ---
 def load_uploaded_file(label):
     return st.file_uploader(f"Upload {label} (CSV or Excel)", type=["csv", "xlsx"], key=label)
 
@@ -29,25 +28,10 @@ def parse_uploaded_file(uploaded_file):
     else:
         df = pd.read_excel(uploaded_file)
     df.columns = df.columns.str.strip().str.lower()
-    # Defensive: normalise column headers, check required columns
     if not {"product name", "quantity"}.issubset(df.columns):
         st.error(f"{uploaded_file.name} must contain 'Product name' and 'Quantity'")
         return None
     return df
-
-def merge_meal_totals(*dfs):
-    totals = {}
-    for df in dfs:
-        if df is not None:
-            for _, row in df.iterrows():
-                key = str(row["product name"]).strip().upper()
-                qty = row["quantity"] if pd.notnull(row["quantity"]) else 0
-                try:
-                    qty = int(qty)
-                except Exception:
-                    qty = 0
-                totals[key] = totals.get(key, 0) + qty
-    return totals
 
 def summary_table(meal_keys, clean, made, elite, total):
     data = []
@@ -76,22 +60,29 @@ def list_reports():
 # --- Streamlit UI ---
 st.title("Bulk Ingredient Summary Report")
 
-# 1–3 file uploads (optionally upload just one!)
+# File uploads
 st.markdown("#### Upload Meal Production Files")
 uploaded_clean = load_uploaded_file("Clean Eats")
 uploaded_made = load_uploaded_file("Made Active")
 uploaded_elite = load_uploaded_file("Elite Meals")
 
-# 1. **Upload Date Selection**
+# Parse uploads (can upload any, all or just one)
+dfs = [
+    parse_uploaded_file(uploaded_clean),
+    parse_uploaded_file(uploaded_made),
+    parse_uploaded_file(uploaded_elite)
+]
+
+# Date selection
 selected_date = st.date_input("Production Date", value=datetime.today())
 selected_date_str = selected_date.strftime("%Y-%m-%d")
 
-# Process uploaded files
+# Stop if none uploaded
 if all(df is None for df in dfs):
     st.info("Please upload at least one file.")
     st.stop()
 
-# Build meal totals for each file (dict: MEAL NAME (upper) → qty)
+# Build meal totals per file
 meal_totals_clean = {}
 meal_totals_made = {}
 meal_totals_elite = {}
@@ -102,15 +93,16 @@ if dfs[1] is not None:
 if dfs[2] is not None:
     meal_totals_elite = {str(row["product name"]).strip().upper(): int(row["quantity"]) for _, row in dfs[2].iterrows()}
 
-# Combine totals
+# Combine totals for all brands
 all_meals = set(meal_totals_clean) | set(meal_totals_made) | set(meal_totals_elite)
 meal_totals_total = {meal: meal_totals_clean.get(meal, 0) + meal_totals_made.get(meal, 0) + meal_totals_elite.get(meal, 0) for meal in all_meals}
 
-# For summary display, build table (sorted by Total desc)
+# Build summary DataFrame for table and PDF
 summary_df = summary_table(
     sorted(all_meals, key=lambda k: meal_totals_total[k], reverse=True),
     meal_totals_clean, meal_totals_made, meal_totals_elite, meal_totals_total
 )
+
 st.markdown("#### Meal Totals by Brand")
 st.dataframe(summary_df, use_container_width=True)
 
@@ -126,7 +118,7 @@ if generate:
     ch, pad, bottom = 6, 4, a4_h - 17
     xpos = [left, left + col_w + 10]
 
-    # -- Draw summary table at top of PDF --
+    # --- Draw summary table at top ---
     pdf.add_page()
     pdf.set_font("Arial", "B", 16)
     pdf.cell(0, 10, f"Daily Production Report - {selected_date.strftime('%d/%m/%Y')}", ln=1, align="C")
@@ -147,8 +139,8 @@ if generate:
         pdf.cell(col_w*0.4, ch, str(row["Total"]), 1)
         pdf.ln(ch)
 
-    # ---- Pass only total dict to all other section functions! ----
-    last_y = pdf.get_y() + 8  # leave some space below summary table
+    # ---- Pass only total dict to section functions! ----
+    last_y = pdf.get_y() + 8
     last_y = draw_bulk_section(pdf, meal_totals_total, xpos, col_w, ch, pad, bottom, start_y=last_y, header_date=selected_date.strftime('%d/%m/%Y'))
     pdf.set_y(last_y)
     last_y = draw_recipes_section(pdf, meal_totals_total, xpos, col_w, ch, pad, bottom, start_y=last_y)
@@ -176,7 +168,7 @@ if generate:
     )
 
 # -------- Show Previous Reports (Search below UI) --------
-st.markdown("----")
+st.markdown("---")
 st.markdown("### Previous Daily Production Reports")
 search_query = st.text_input("Search previous reports by date (YYYY-MM-DD):", "")
 report_files = list_reports()
@@ -187,4 +179,3 @@ if report_files:
         st.markdown(f"[{os.path.basename(f)}]({f})")
 else:
     st.info("No previous reports found.")
-
