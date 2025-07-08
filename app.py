@@ -61,9 +61,10 @@ for f in uploaded_files:
     else:
         dfs.append(None)
 
-if not any(dfs):
+if all(df is None for df in dfs):
     st.info("Please upload at least one orders file to proceed.")
     st.stop()
+
 
 # --- MEAL SUMMARY TABLE ---
 all_meals = set()
